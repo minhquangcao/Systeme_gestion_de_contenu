@@ -1,0 +1,6 @@
+PyQt5
+PyQt5-tools
+Pillow
+PyPDF2
+selenium
+beautifulsoup4

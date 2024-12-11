@@ -145,7 +145,21 @@ class MainWindow(QMainWindow):
     def get_stylesheet(self):
         return """
         QMainWindow {
-            background-color: #f4f4f4;
+            background-color: #2b2b2b;
+        }
+        QTabWidget::pane {
+            border: 1px solid #444;
+            background: #333;
+        }
+        QTabBar::tab {
+            background: #444;
+            color: white;
+            padding: 10px;
+            margin: 1px;
+            border-radius: 5px;
+        }
+        QTabBar::tab:selected {
+            background: #0078d7;
         }
         QPushButton {
             background-color: #0078d7;
@@ -158,12 +172,17 @@ class MainWindow(QMainWindow):
             background-color: #005a9e;
         }
         QLineEdit, QTextEdit {
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             padding: 5px;
             border-radius: 3px;
+            background: #222;
+            color: white;
         }
         QLabel {
-            color: #333;
+            color: #ddd;
+        }
+        QFormLayout {
+            margin: 10px;
         }
         """
 

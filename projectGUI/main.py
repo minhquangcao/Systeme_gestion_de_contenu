@@ -4,18 +4,21 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton, QFormLayout,
     QFileDialog, QMessageBox, QHBoxLayout
 )
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor, QPalette
 from PyQt5.QtCore import Qt
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Outil d'Analyse et de Gestion d'Articles")
-        self.setGeometry(100, 100, 900, 600)
-        self.setStyleSheet(self.get_stylesheet())  # Appliquer un style moderne
+        self.setGeometry(100, 100, 1000, 700)
+
+        # Appliquer un style moderne
+        self.setStyleSheet(self.get_stylesheet())
 
         # Création des onglets
         self.tabs = QTabWidget()
+        self.tabs.setStyleSheet("background-color: #f9f9f9;")
         self.setCentralWidget(self.tabs)
 
         # Ajouter les sections
@@ -33,6 +36,7 @@ class MainWindow(QMainWindow):
         # Champ URL
         form = QFormLayout()
         self.url_input = QLineEdit()
+        self.url_input.setPlaceholderText("https://exemple.com")
         form.addRow("Entrez l'URL du site :", self.url_input)
         layout.addLayout(form)
 
@@ -54,9 +58,13 @@ class MainWindow(QMainWindow):
         # Formulaire
         form = QFormLayout()
         self.title_input = QLineEdit()
+        self.title_input.setPlaceholderText("Titre de l'article")
         self.intro_input = QTextEdit()
+        self.intro_input.setPlaceholderText("Rédigez l'introduction ici...")
         self.body_input = QTextEdit()
+        self.body_input.setPlaceholderText("Rédigez le corps de l'article ici...")
         self.author_name_input = QLineEdit()
+        self.author_name_input.setPlaceholderText("Nom de l'auteur")
         self.author_photo_button = QPushButton("Importer une Photo")
         self.author_photo_button.clicked.connect(self.load_author_photo)
 
@@ -85,9 +93,12 @@ class MainWindow(QMainWindow):
         # Formulaire FTP
         form = QFormLayout()
         self.ftp_ip_input = QLineEdit()
+        self.ftp_ip_input.setPlaceholderText("192.168.1.1 ou ftp.exemple.com")
         self.ftp_username_input = QLineEdit()
+        self.ftp_username_input.setPlaceholderText("Nom d'utilisateur")
         self.ftp_password_input = QLineEdit()
         self.ftp_password_input.setEchoMode(QLineEdit.Password)
+        self.ftp_password_input.setPlaceholderText("Mot de passe")
 
         form.addRow("Adresse IP/URL :", self.ftp_ip_input)
         form.addRow("Identifiant :", self.ftp_username_input)
@@ -104,8 +115,9 @@ class MainWindow(QMainWindow):
 
     def create_title(self, text):
         title = QLabel(text)
-        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setFont(QFont("Arial", 20, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #333;")
         return title
 
     def analyze_site(self):
@@ -145,44 +157,50 @@ class MainWindow(QMainWindow):
     def get_stylesheet(self):
         return """
         QMainWindow {
-            background-color: #2b2b2b;
+            background-color: #f0f2f5;
         }
         QTabWidget::pane {
-            border: 1px solid #444;
-            background: #333;
+            border: 1px solid #ccc;
+            background: #ffffff;
+            border-radius: 10px;
         }
         QTabBar::tab {
-            background: #444;
-            color: white;
+            background: #e7e9ec;
+            color: #333;
             padding: 10px;
-            margin: 1px;
             border-radius: 5px;
         }
         QTabBar::tab:selected {
             background: #0078d7;
+            color: white;
         }
         QPushButton {
-            background-color: #0078d7;
-            color: white;
-            border: none;
-            padding: 10px;
+            background-color: #4CAF50;
+            color: green;
+            border: 1px solid #388E3C;
+            padding: 10px 15px;
             border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
         }
         QPushButton:hover {
-            background-color: #005a9e;
+            background-color: #45A049;
+        }
+        QPushButton:pressed {
+            background-color: #388E3C;
         }
         QLineEdit, QTextEdit {
-            border: 1px solid #555;
-            padding: 5px;
-            border-radius: 3px;
-            background: #222;
-            color: white;
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 4px;
+            background: white;
+            color: #333;
+            font-size: 14px;
         }
         QLabel {
-            color: #ddd;
-        }
-        QFormLayout {
-            margin: 10px;
+            color: #555;
         }
         """
 

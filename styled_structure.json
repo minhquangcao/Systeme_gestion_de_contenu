@@ -1,0 +1,58 @@
+{
+    "tag": "main",
+    "styles": {},
+    "children": [
+        {
+            "tag": "div",
+            "styles": {},
+            "children": [
+                {
+                    "tag": "h1",
+                    "styles": {}
+                },
+                {
+                    "tag": "div",
+                    "styles": {},
+                    "children": [
+                        {
+                            "tag": "div",
+                            "styles": {},
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "styles": {},
+                                    "children": [
+                                        {
+                                            "tag": "div",
+                                            "styles": {},
+                                            "children": [
+                                                {
+                                                    "tag": "img",
+                                                    "styles": {}
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "tag": "article",
+                                    "styles": {},
+                                    "children": [
+                                        {
+                                            "tag": "h3",
+                                            "styles": {}
+                                        },
+                                        {
+                                            "tag": "p",
+                                            "styles": {}
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

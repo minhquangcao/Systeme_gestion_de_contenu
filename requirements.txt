@@ -4,3 +4,7 @@ Pillow
 PyPDF2
 selenium
 beautifulsoup4
+BeautifulSoup
+re
+json
+requests

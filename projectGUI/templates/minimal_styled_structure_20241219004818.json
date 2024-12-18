@@ -1,0 +1,187 @@
+{
+    "tag": "main",
+    "styles": {},
+    "children": [
+        {
+            "tag": "div",
+            "styles": {
+                "padding-bottom": "35px",
+                "width": "100%",
+                "background": "#B880FF",
+                "color": "#171A22"
+            },
+            "children": [
+                {
+                    "tag": "div",
+                    "styles": {
+                        "padding-bottom": "35px",
+                        "width": "100%",
+                        "background": "#B880FF",
+                        "color": "#171A22",
+                        "display": "flex",
+                        "-webkit-flex": "1",
+                        "-ms-flex": "1",
+                        "flex": "1",
+                        "-webkit-flex-direction": "column",
+                        "-ms-flex-direction": "column",
+                        "flex-direction": "column",
+                        "height": "100%",
+                        "margin": "0 auto",
+                        "padding": "0 15px",
+                        "position": "relative"
+                    },
+                    "children": [
+                        {
+                            "tag": "div",
+                            "styles": {
+                                "padding-bottom": "35px",
+                                "width": "100%",
+                                "background": "#B880FF",
+                                "color": "#171A22",
+                                "display": "flex",
+                                "-webkit-flex": "1",
+                                "-ms-flex": "1",
+                                "flex": "1",
+                                "-webkit-flex-direction": "column",
+                                "-ms-flex-direction": "column",
+                                "flex-direction": "column",
+                                "height": "100%",
+                                "margin": "0 auto",
+                                "padding": "0 15px",
+                                "position": "relative"
+                            },
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "styles": {
+                                        "padding-bottom": "35px",
+                                        "width": "100%",
+                                        "background": "#B880FF",
+                                        "color": "#171A22",
+                                        "display": "flex",
+                                        "-webkit-flex": "1",
+                                        "-ms-flex": "1",
+                                        "flex": "1",
+                                        "-webkit-flex-direction": "column",
+                                        "-ms-flex-direction": "column",
+                                        "flex-direction": "column",
+                                        "height": "100%",
+                                        "margin": "0 auto",
+                                        "padding": "0 15px",
+                                        "position": "relative",
+                                        "padding-left": "0"
+                                    },
+                                    "children": [
+                                        {
+                                            "tag": "div",
+                                            "styles": {
+                                                "padding-bottom": "35px",
+                                                "width": "100%",
+                                                "background": "#B880FF",
+                                                "color": "inherit",
+                                                "display": "flex",
+                                                "-webkit-flex": "1",
+                                                "-ms-flex": "1",
+                                                "flex": "1",
+                                                "-webkit-flex-direction": "column",
+                                                "-ms-flex-direction": "column",
+                                                "flex-direction": "column",
+                                                "height": "100%",
+                                                "margin": "0 auto",
+                                                "padding": "0 15px",
+                                                "position": "relative",
+                                                "padding-left": "0",
+                                                "padding-top": "24px"
+                                            },
+                                            "children": [
+                                                {
+                                                    "tag": "ul",
+                                                    "styles": {
+                                                        "padding-bottom": "35px",
+                                                        "width": "100%",
+                                                        "background": "#B880FF",
+                                                        "color": "inherit",
+                                                        "display": "inline-block",
+                                                        "-webkit-flex": "1",
+                                                        "-ms-flex": "1",
+                                                        "flex": "1",
+                                                        "-webkit-flex-direction": "column",
+                                                        "-ms-flex-direction": "column",
+                                                        "flex-direction": "column",
+                                                        "height": "100%",
+                                                        "margin": "0 auto",
+                                                        "padding": "0 15px",
+                                                        "position": "relative",
+                                                        "padding-left": "0",
+                                                        "padding-top": "24px",
+                                                        "font-family": "Inter",
+                                                        "font-size": "12px"
+                                                    },
+                                                    "children": [
+                                                        {
+                                                            "tag": "li",
+                                                            "styles": {
+                                                                "padding-bottom": "35px",
+                                                                "width": "100%",
+                                                                "background": "#B880FF",
+                                                                "color": "inherit",
+                                                                "display": "inline-block",
+                                                                "-webkit-flex": "1",
+                                                                "-ms-flex": "1",
+                                                                "flex": "1",
+                                                                "-webkit-flex-direction": "column",
+                                                                "-ms-flex-direction": "column",
+                                                                "flex-direction": "column",
+                                                                "height": "100%",
+                                                                "margin": "0 auto",
+                                                                "padding": "0 15px",
+                                                                "position": "relative",
+                                                                "padding-left": "0",
+                                                                "padding-top": "24px",
+                                                                "font-family": "Inter",
+                                                                "font-size": "12px"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "h1",
+                                            "styles": {
+                                                "padding-bottom": "35px",
+                                                "width": "100%",
+                                                "background": "#B880FF",
+                                                "color": "#171A22",
+                                                "display": "inline-block",
+                                                "-webkit-flex": "1",
+                                                "-ms-flex": "1",
+                                                "flex": "1",
+                                                "-webkit-flex-direction": "column",
+                                                "-ms-flex-direction": "column",
+                                                "flex-direction": "column",
+                                                "height": "100%",
+                                                "margin": "0 auto",
+                                                "padding": "0 15px",
+                                                "position": "relative",
+                                                "padding-left": "0",
+                                                "font-family": "Factor A",
+                                                "font-size": "24px",
+                                                "line-height": "1.25",
+                                                "margin-bottom": "20px",
+                                                "margin-top": "20px",
+                                                "max-width": "250px",
+                                                "word-break": "break-word",
+                                                "overflow-wrap": "break-word"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

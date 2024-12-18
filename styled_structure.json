@@ -1,6 +1,8 @@
 {
     "tag": "main",
-    "styles": {},
+    "styles": {
+        "background-color": "#fff"
+    },
     "children": [
         {
             "tag": "div",
@@ -8,7 +10,12 @@
             "children": [
                 {
                     "tag": "h1",
-                    "styles": {}
+                    "styles": {
+                        "color": "#222",
+                        "font-size": "33px",
+                        "font-family": "Lora",
+                        "font-weight": "400"
+                    }
                 },
                 {
                     "tag": "div",
@@ -31,6 +38,34 @@
                                                     "styles": {}
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "tag": "div",
+                                            "styles": {},
+                                            "children": [
+                                                {
+                                                    "tag": "h2",
+                                                    "styles": {
+                                                        "color": "#222",
+                                                        "font-size": "21.5px",
+                                                        "font-family": "Lora",
+                                                        "font-weight": "700"
+                                                    }
+                                                },
+                                                {
+                                                    "tag": "h3",
+                                                    "styles": {
+                                                        "color": "#666",
+                                                        "font-size": "17px",
+                                                        "font-family": "Lora",
+                                                        "font-weight": "400"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "div",
+                                            "styles": {}
                                         }
                                     ]
                                 },
@@ -40,11 +75,20 @@
                                     "children": [
                                         {
                                             "tag": "h3",
-                                            "styles": {}
+                                            "styles": {
+                                                "color": "#222",
+                                                "font-size": "17px",
+                                                "font-family": "Lora",
+                                                "font-weight": "700"
+                                            }
                                         },
                                         {
                                             "tag": "p",
-                                            "styles": {}
+                                            "styles": {
+                                                "color": "#222",
+                                                "font-size": "17px",
+                                                "font-family": "Lora"
+                                            }
                                         }
                                     ]
                                 }

@@ -1,211 +1,158 @@
-import sys
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QTabWidget, QWidget,
-    QVBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton, QFormLayout,
-    QFileDialog, QMessageBox, QHBoxLayout
+import streamlit as st
+from PIL import Image
+
+# Configuration de la page
+st.set_page_config(
+    page_title="Outil Pro de Gestion d'Articles",
+    page_icon="📋",
+    layout="wide"
 )
-from PyQt5.QtGui import QFont, QColor, QPalette
-from PyQt5.QtCore import Qt
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Outil d'Analyse et de Gestion d'Articles")
-        self.setGeometry(100, 100, 1000, 700)
-
-        # Appliquer un style moderne
-        self.setStyleSheet(self.get_stylesheet())
-
-        # Création des onglets
-        self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("background-color: #f9f9f9;")
-        self.setCentralWidget(self.tabs)
-
-        # Ajouter les sections
-        self.tabs.addTab(self.create_analysis_tab(), "Analyse de Site")
-        self.tabs.addTab(self.create_article_tab(), "Création d'Articles")
-        self.tabs.addTab(self.create_ftp_tab(), "Transfert FTP")
-
-    def create_analysis_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # Titre
-        layout.addWidget(self.create_title("Analyse de Site"))
-
-        # Champ URL
-        form = QFormLayout()
-        self.url_input = QLineEdit()
-        self.url_input.setPlaceholderText("https://exemple.com")
-        form.addRow("Entrez l'URL du site :", self.url_input)
-        layout.addLayout(form)
-
-        # Bouton d'analyse
-        analyze_button = QPushButton("Analyser")
-        analyze_button.clicked.connect(self.analyze_site)
-        layout.addWidget(analyze_button, alignment=Qt.AlignRight)
-
-        tab.setLayout(layout)
-        return tab
-
-    def create_article_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # Titre
-        layout.addWidget(self.create_title("Création d'Articles"))
-
-        # Formulaire
-        form = QFormLayout()
-        self.title_input = QLineEdit()
-        self.title_input.setPlaceholderText("Titre de l'article")
-        self.intro_input = QTextEdit()
-        self.intro_input.setPlaceholderText("Rédigez l'introduction ici...")
-        self.body_input = QTextEdit()
-        self.body_input.setPlaceholderText("Rédigez le corps de l'article ici...")
-        self.author_name_input = QLineEdit()
-        self.author_name_input.setPlaceholderText("Nom de l'auteur")
-        self.author_photo_button = QPushButton("Importer une Photo")
-        self.author_photo_button.clicked.connect(self.load_author_photo)
-
-        form.addRow("Titre :", self.title_input)
-        form.addRow("Introduction :", self.intro_input)
-        form.addRow("Corps de l'article :", self.body_input)
-        form.addRow("Nom de l'Auteur :", self.author_name_input)
-        form.addRow("Photo de l'Auteur :", self.author_photo_button)
-        layout.addLayout(form)
-
-        # Bouton d'enregistrement
-        submit_button = QPushButton("Enregistrer l'Article")
-        submit_button.clicked.connect(self.save_article)
-        layout.addWidget(submit_button, alignment=Qt.AlignRight)
-
-        tab.setLayout(layout)
-        return tab
-
-    def create_ftp_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # Titre
-        layout.addWidget(self.create_title("Transfert FTP"))
-
-        # Formulaire FTP
-        form = QFormLayout()
-        self.ftp_ip_input = QLineEdit()
-        self.ftp_ip_input.setPlaceholderText("192.168.1.1 ou ftp.exemple.com")
-        self.ftp_username_input = QLineEdit()
-        self.ftp_username_input.setPlaceholderText("Nom d'utilisateur")
-        self.ftp_password_input = QLineEdit()
-        self.ftp_password_input.setEchoMode(QLineEdit.Password)
-        self.ftp_password_input.setPlaceholderText("Mot de passe")
-
-        form.addRow("Adresse IP/URL :", self.ftp_ip_input)
-        form.addRow("Identifiant :", self.ftp_username_input)
-        form.addRow("Mot de Passe :", self.ftp_password_input)
-        layout.addLayout(form)
-
-        # Bouton de transfert
-        transfer_button = QPushButton("Transférer")
-        transfer_button.clicked.connect(self.transfer_files)
-        layout.addWidget(transfer_button, alignment=Qt.AlignRight)
-
-        tab.setLayout(layout)
-        return tab
-
-    def create_title(self, text):
-        title = QLabel(text)
-        title.setFont(QFont("Arial", 20, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #333;")
-        return title
-
-    def analyze_site(self):
-        url = self.url_input.text()
-        if not url:
-            self.show_alert("Erreur", "Veuillez entrer une URL valide.")
-        else:
-            print(f"Analyse du site : {url}")  # Remplacer par la logique réelle
-
-    def load_author_photo(self):
-        photo_path, _ = QFileDialog.getOpenFileName(self, "Choisir une Photo", "", "Images (*.png *.jpg *.jpeg)")
-        if photo_path:
-            print(f"Photo sélectionnée : {photo_path}")
-
-    def save_article(self):
-        if not self.title_input.text() or not self.body_input.toPlainText():
-            self.show_alert("Erreur", "Veuillez remplir tous les champs obligatoires.")
-        else:
-            print("Article sauvegardé avec succès.")  # Remplacer par la logique réelle
-
-    def transfer_files(self):
-        ip = self.ftp_ip_input.text()
-        username = self.ftp_username_input.text()
-        password = self.ftp_password_input.text()
-        if not ip or not username or not password:
-            self.show_alert("Erreur", "Tous les champs FTP sont obligatoires.")
-        else:
-            print(f"Connexion FTP : {ip}, {username}")  # Remplacer par la logique réelle
-
-    def show_alert(self, title, message):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Warning)
-        msg.setWindowTitle(title)
-        msg.setText(message)
-        msg.exec_()
-
-    def get_stylesheet(self):
-        return """
-        QMainWindow {
-            background-color: #f0f2f5;
+# CSS personnalisé pour améliorer le style
+def apply_custom_styles():
+    st.markdown(
+        """
+        <style>
+        body {
+            background: linear-gradient(to bottom, #ffffff, #e6f7ff);
+            font-family: 'Arial', sans-serif;
         }
-        QTabWidget::pane {
-            border: 1px solid #ccc;
-            background: #ffffff;
-            border-radius: 10px;
+        .main-title {
+            font-size: 2.8em;
+            color: #0078d7;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        QTabBar::tab {
-            background: #e7e9ec;
-            color: #333;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        QTabBar::tab:selected {
-            background: #0078d7;
+        .sidebar .sidebar-content {
+            background-color: #00457c !important;
             color: white;
         }
-        QPushButton {
-            background-color: #4CAF50;
-            color: green;
-            border: 1px solid #388E3C;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
+        .sidebar .css-1lcbmhc {
+            padding: 20px !important;
+        }
+        .stButton>button {
+            background-color: #4CAF50 !important;
+            color: white !important;
+            border: none;
+            padding: 10px 20px;
             font-weight: bold;
-            text-transform: uppercase;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
         }
-        QPushButton:hover {
-            background-color: #45A049;
+        .stButton>button:hover {
+            background-color: #45a049 !important;
         }
-        QPushButton:pressed {
-            background-color: #388E3C;
+        .stFileUploader label {
+            color: #0078d7 !important;
         }
-        QLineEdit, QTextEdit {
-            border: 1px solid #ccc;
-            padding: 8px;
-            border-radius: 4px;
-            background: white;
-            color: #333;
-            font-size: 14px;
-        }
-        QLabel {
-            color: #555;
-        }
-        """
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
+apply_custom_styles()
+
+# Titre principal
+st.markdown('<div class="main-title">🌐 Outil Pro de Gestion d\'Articles</div>', unsafe_allow_html=True)
+
+# Menu de navigation dans la barre latérale
+st.sidebar.title("📂 Menu de Navigation")
+menu = st.sidebar.radio(
+    "Choisissez une section :", 
+    ["Accueil", "Analyse de Site", "Création d'Articles", "Transfert FTP", "Informations"]
+)
+
+# **Accueil**
+if menu == "Accueil":
+    st.header("🏠 Bienvenue sur l'Outil Pro de Gestion d'Articles")
+    st.markdown(
+        """
+        Cet outil vous permet de :
+        - Analyser des sites web pour en extraire des modèles d'articles.
+        - Créer des articles avec des contenus personnalisés.
+        - Transférer automatiquement vos fichiers sur un serveur via FTP.
+        
+        Explorez les fonctionnalités à l'aide du menu de navigation. 🖱️
+        """
+    )
+# **Analyse de site web**
+elif menu == "Analyse de Site":
+    st.header("🌐 Analyse de Site Web")
+    st.markdown("Analysez un site pour extraire ses modèles d'articles.")
+    url = st.text_input("Entrez l'URL à analyser :", placeholder="https://exemple.com")
+    if st.button("Analyser le Site"):
+        if not url:
+            st.error("❌ Veuillez entrer une URL valide.")
+        else:
+            with st.spinner("🔍 Analyse en cours..."):
+                # Résultats simulés
+                st.success("✅ Analyse terminée avec succès !")
+                st.json({
+                    "Structure détectée": {
+                        "Polices": ["Arial", "16px"],
+                        "Couleurs": ["Bleu", "Gris"],
+                        "Disposition": "Trois colonnes"
+                    },
+                    "Temps de chargement": "2.3 secondes",
+                    "Erreurs détectées": "Aucune"
+                })
+
+# **Création d'Articles**
+elif menu == "Création d'Articles":
+    st.header("📝 Création d'Articles")
+    st.markdown("Complétez les champs ci-dessous pour générer un article.")
+    title = st.text_input("Titre de l'article :", placeholder="Entrez un titre captivant")
+    intro = st.text_area("Introduction :", placeholder="Rédigez une introduction percutante")
+    body = st.text_area("Contenu :", placeholder="Développez le contenu ici")
+    author = st.text_input("Nom de l'auteur :", placeholder="Nom de l'auteur")
+    image_file = st.file_uploader("Image principale (optionnel) :", type=["png", "jpg", "jpeg"])
+
+
+    if image_file:
+        st.image(Image.open(image_file), caption="Aperçu de l'image téléchargée", use_column_width=True)
+
+    if st.button("Générer l'Article"):
+        if not title or not body:
+            st.error("❌ Les champs obligatoires doivent être remplis.")
+        else:
+            st.success("✅ Article généré avec succès !")
+            st.markdown(f"**Titre :** {title}")
+            st.markdown(f"**Introduction :** {intro}")
+            st.markdown(f"**Auteur :** {author}")
+            st.markdown(f"**Contenu :** {body}")
+    
+    
+# **Transfert FTP**
+elif menu == "Transfert FTP":
+    st.header("📤 Transfert FTP")
+    st.markdown("Entrez les informations nécessaires pour transférer vos fichiers.")
+    ftp_ip = st.text_input("Adresse du serveur FTP :", placeholder="ftp.exemple.com")
+    ftp_user = st.text_input("Nom d'utilisateur FTP :", placeholder="Utilisateur")
+    ftp_password = st.text_input("Mot de passe FTP :", type="password")
+
+    if st.button("Transférer les fichiers"):
+        if not ftp_ip or not ftp_user or not ftp_password:
+            st.error("❌ Veuillez remplir tous les champs.")
+        else:
+            with st.spinner("📤 Transfert en cours..."):
+                st.success(f"✅ Fichiers transférés avec succès sur le serveur : {ftp_ip}")
+
+# **Informations**
+elif menu == "Informations":
+    st.header("ℹ️ À Propos de l'Outil")
+    st.markdown(
+        """
+        Cet outil a été conçu pour simplifier la gestion de contenu en ligne pour les producteurs de contenu ayant :
+        - Peu de ressources techniques.
+        - Des besoins spécifiques en gestion de contenu léger.
+
+        **Principales fonctionnalités :**
+        - Analyse automatique de la structure des articles d'un site.
+        - Création d'articles en suivant le modèle détecté.
+        - Transfert des fichiers vers un serveur FTP cible.
+        """
+    )
+
+# Footer
+st.sidebar.markdown("---")
+st.sidebar.markdown("© 2024 Outil Pro de Gestion d'Articles")

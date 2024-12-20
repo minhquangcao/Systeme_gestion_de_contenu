@@ -109,6 +109,7 @@ elif menu == "Création d'Articles":
     author = st.text_input("Nom de l'auteur :", placeholder="Nom de l'auteur")
     image_file = st.file_uploader("Image principale (optionnel) :", type=["png", "jpg", "jpeg"])
 
+
     if image_file:
         st.image(Image.open(image_file), caption="Aperçu de l'image téléchargée", use_column_width=True)
 
@@ -121,7 +122,8 @@ elif menu == "Création d'Articles":
             st.markdown(f"**Introduction :** {intro}")
             st.markdown(f"**Auteur :** {author}")
             st.markdown(f"**Contenu :** {body}")
-
+    
+    
 # **Transfert FTP**
 elif menu == "Transfert FTP":
     st.header("📤 Transfert FTP")

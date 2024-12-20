@@ -4,33 +4,55 @@ import cssutils
 import json
 import os
 from datetime import datetime
+from urllib.parse import urljoin
+from concurrent.futures import ThreadPoolExecutor
 
-IMPORTANT_TAGS = {"header", "main", "article", "section", "div", "h1", "h2", "h3", "p", "img", "ul", "ol", "li"}
+IMPORTANT_TAGS = {"header", "main", "article", "section", "div", "h1", "h2", "h3", "p", "img", "ul", "ol", "li", 
+                  "a", "span", "strong", "em", "blockquote", "code", "pre", "table", "tr", "th", "td", "form", 
+                  "input", "button", "select", "textarea", "label", "nav", "footer", "aside", "figure", "figcaption"
+                  , "video", "audio", "iframe", "canvas", "svg", "path", "circle", "rect", "polygon", "polyline",
+                  "ellipse", "line", "g", "defs", "symbol", "use", "text", "tspan", "textPath", "clipPath", "mask",
+                  "pattern", "linearGradient", "radialGradient", "stop", "a", "title", "desc", "metadata", "defs",
+                  "style", "template"}
 
 def fetch_global_styles(soup, base_url):
     """
-    Récupère les styles globaux de la page, en tenant compte des erreurs et de la taille des CSS.
+    Récupère les styles globaux d'une page HTML (balises <style> et fichiers CSS liés),
+    avec gestion des erreurs et optimisation des téléchargements.
     """
     styles = ""
 
-    # Récupérer les styles dans les balises <style>
+    # Étape 1 : Récupérer les styles dans les balises <style>
     for style_tag in soup.find_all("style"):
         styles += style_tag.string or ""
 
-    # Récupérer les fichiers CSS liés
-    for link_tag in soup.find_all("link", rel="stylesheet"):
-        href = link_tag.get("href")
-        if href:
-            stylesheet_url = href if href.startswith("http") else f"{base_url}/{href}"
-            try:
-                response = requests.get(stylesheet_url, timeout=5)  # Timeout pour éviter les blocages
-                response.raise_for_status()
-                if len(response.text) > 500000:  # Limiter la taille des CSS traités (500 Ko ici)
-                    print(f"Fichier CSS trop volumineux ignoré : {stylesheet_url}")
-                    continue
-                styles += response.text
-            except requests.exceptions.RequestException as e:
-                print(f"Erreur lors de la récupération de {stylesheet_url}: {e}")
+    # Étape 2 : Identifier les fichiers CSS liés
+    css_links = {
+        urljoin(base_url, link_tag.get("href"))
+        for link_tag in soup.find_all("link", rel="stylesheet")
+        if link_tag.get("href")
+    }
+
+    # Étape 3 : Télécharger les fichiers CSS en parallèle
+    def fetch_stylesheet(url):
+        """Télécharge un fichier CSS avec gestion des erreurs et limite de taille."""
+        try:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            if len(response.text) > 500000:  # Limiter la taille des CSS à 500 Ko
+                print(f"Fichier CSS trop volumineux ignoré : {url}")
+                return ""
+            return response.text
+        except requests.exceptions.RequestException as e:
+            print(f"Erreur lors de la récupération de {url}: {e}")
+            return ""
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        css_contents = executor.map(fetch_stylesheet, css_links)
+
+    # Étape 4 : Ajouter les contenus CSS récupérés
+    for content in css_contents:
+        styles += content
 
     return styles
 
@@ -177,6 +199,7 @@ if __name__ == "__main__":
     if result:
         print("Structure avec styles minimalistes en JSON :")
         print(result)
+        
         # Créer le dossier s'il n'existe pas
         output_dir = "projectGUI/templates"
         os.makedirs(output_dir, exist_ok=True)
@@ -185,7 +208,7 @@ if __name__ == "__main__":
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"minimal_styled_structure_{timestamp}.json"
         filepath = os.path.join(output_dir, filename)
-
+        
         # Sauvegarder le fichier
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(result)

@@ -118,17 +118,30 @@ def get_complete_styles(element, css_rules, parent_styles):
 
     return combined_styles  # Garder tous les styles disponibles
 
-def get_minimal_structure_with_styles(element, css_rules, seen_tags, parent_styles=None):
+def get_minimal_structure_with_styles(element, css_rules, seen_tags, parent_styles=None, tag_counters=None, max_occurrences=5):
     """
     Retourne une structure simplifiée et stylée d'un élément en évitant les doublons
-    et sans inclure de contenu textuel.
+    et limite le nombre d'instances incluses pour chaque type de balise.
     """
-    if element.name not in IMPORTANT_TAGS or element.name in seen_tags:
-        return None  # Ignorer les balises déjà vues ou non importantes
+    # Initialiser le compteur pour les balises si nécessaire
+    if tag_counters is None:
+        tag_counters = {}
 
-    parent_styles = parent_styles or {}
-    
+    # Vérifier si la balise est importante
+    if element.name not in IMPORTANT_TAGS:
+        return None  # Ignorer les balises non importantes
+
+    # Initialiser ou incrémenter le compteur pour cette balise
+    if element.name not in tag_counters:
+        tag_counters[element.name] = 0
+    tag_counters[element.name] += 1
+
+    # Vérifier si la limite pour cette balise est atteinte
+    if tag_counters[element.name] > max_occurrences:
+        return None
+
     # Récupérer les styles complets pour l'élément
+    parent_styles = parent_styles or {}
     element_styles = get_complete_styles(element, css_rules, parent_styles)
 
     # Ajouter la balise et ses styles au résultat
@@ -140,7 +153,9 @@ def get_minimal_structure_with_styles(element, css_rules, seen_tags, parent_styl
 
     # Parcourir les enfants directs
     for child in element.find_all(recursive=False):
-        child_structure = get_minimal_structure_with_styles(child, css_rules, seen_tags, element_styles)
+        child_structure = get_minimal_structure_with_styles(
+            child, css_rules, seen_tags, element_styles, tag_counters, max_occurrences
+        )
         if child_structure:
             structure["children"].append(child_structure)
 
@@ -148,10 +163,8 @@ def get_minimal_structure_with_styles(element, css_rules, seen_tags, parent_styl
     if not structure["children"]:
         structure.pop("children", None)
 
-    # Marquer la balise comme vue
-    seen_tags.add(element.name)
-
     return structure
+
 
 def extract_structure_and_styles(url):
     """
@@ -179,9 +192,11 @@ def extract_structure_and_styles(url):
 
         # Initialiser l'ensemble des balises vues
         seen_tags = set()
-
-        # Extraire la structure minimale
-        minimal_structure = get_minimal_structure_with_styles(root_element, css_rules, seen_tags)
+        tag_counters = {}
+# Extraire la structure minimale avec une limite d'occurrences par balise
+        minimal_structure = get_minimal_structure_with_styles(
+            root_element, css_rules, seen_tags, tag_counters=tag_counters, max_occurrences=5
+        )
 
         # Conversion en JSON
         return json.dumps(minimal_structure, indent=4, ensure_ascii=False)

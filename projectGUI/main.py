@@ -75,8 +75,6 @@ if menu == "Accueil":
         Explorez les fonctionnalités à l'aide du menu de navigation. 🖱️
         """
     )
-    st.image("https://source.unsplash.com/900x400/?technology,web", caption="Gérez vos articles avec simplicité")
-
 # **Analyse de site web**
 elif menu == "Analyse de Site":
     st.header("🌐 Analyse de Site Web")
@@ -154,8 +152,7 @@ elif menu == "Informations":
         - Transfert des fichiers vers un serveur FTP cible.
         """
     )
-    st.image("https://source.unsplash.com/800x300/?technology,content", caption="Des solutions adaptées à vos besoins")
 
 # Footer
 st.sidebar.markdown("---")
-st.sidebar.markdown("© 2024 - Pro par Idun Group")
+st.sidebar.markdown("© 2024 Outil Pro de Gestion d'Articles")

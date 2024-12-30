@@ -1,5 +1,11 @@
 import streamlit as st
 from PIL import Image
+from backend.ftp_transfer import FTPClient
+import sys
+import os
+
+# Ajouter le chemin racine du projet
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Configuration de la page
 st.set_page_config(
@@ -135,6 +141,14 @@ elif menu == "Transfert FTP":
             st.error("❌ Veuillez remplir tous les champs.")
         else:
             with st.spinner("📤 Transfert en cours..."):
+                ftp_client = FTPClient(ftp_ip, ftp_user, ftp_password)
+                ftp_client.connect()
+                # Exemple de fichier à transférer, adapter selon vos besoins
+                files_and_directories = {
+                    "backend/test.txt": "test"
+                }
+                ftp_client.transfer_files(files_and_directories)
+                ftp_client.disconnect()
                 st.success(f"✅ Fichiers transférés avec succès sur le serveur : {ftp_ip}")
 
 # **Informations**

@@ -216,7 +216,7 @@ if __name__ == "__main__":
         print(result)
         
         # Créer le dossier s'il n'existe pas
-        output_dir = "projectGUI/templates"
+        output_dir = "frontend/templates"
         os.makedirs(output_dir, exist_ok=True)
 
         # Générer un nom de fichier unique basé sur la date et l'heure

@@ -1,9 +1,22 @@
-from ftplib import FTP_TLS
+import ftplib
 import os
-import socket
+
 FTP_HOST = "localhost"
 FTP_USER = "ftpuser"
 FTP_PASSWORD = "test123"
+
+class Explicit_FTP_TLS(ftplib.FTP_TLS):
+    """Explicit FTPS, with shared TLS session"""
+    def ntransfercmd(self, cmd, rest=None):
+        conn, size = ftplib.FTP.ntransfercmd(self, cmd, rest)
+        if self._prot_p:
+            conn = self.context.wrap_socket(
+                conn,
+                server_hostname=self.host,
+                session=self.sock.session
+            )
+        return conn, size
+
 
 
 def connect_to_ftp(host, user, password):
@@ -11,13 +24,11 @@ def connect_to_ftp(host, user, password):
     Connecte au serveur FTP avec les informations fournies.
     """
     try:
-        ftp = FTP_TLS(host)
-        ftp.auth()
+        ftp = Explicit_FTP_TLS(host)
+        ftp.auth()  # Initialiser l'authentification TLS
         ftp.login(user=user, passwd=password)
-        ftp.prot_p()  # Activer la protection des données
+        ftp.prot_p()  # Activer la protection de la connexion de données
         ftp.set_pasv(True)  # Activer le mode passif
-        ftp.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)  # Gérer la session TLS
-        ftp.set_debuglevel(2)  # Activer les logs de débogage
         print(f"Connexion réussie au serveur FTP : {host}")
         return ftp
     except Exception as e:
@@ -71,9 +82,8 @@ if __name__ == "__main__":
 
     # Étape 2 : Fichiers à transférer et leurs répertoires distants
     files_and_directories = {
-        "test.txt": "/test"     # Article HTML généré
+        "test.txt": "/test"     # Exemple de fichier à transférer
     }
 
     # Étape 3 : Transférer les fichiers
     transfer_files_to_ftp(ftp_host, ftp_user, ftp_password, files_and_directories)
-

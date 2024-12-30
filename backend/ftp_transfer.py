@@ -1,11 +1,7 @@
 import ftplib
 import os
 
-FTP_HOST = "localhost"
-FTP_USER = "ftpuser"
-FTP_PASSWORD = "test123"
-
-class Explicit_FTP_TLS(ftplib.FTP_TLS):
+class ExplicitFTPTLS(ftplib.FTP_TLS):
     """Explicit FTPS, with shared TLS session"""
     def ntransfercmd(self, cmd, rest=None):
         conn, size = ftplib.FTP.ntransfercmd(self, cmd, rest)
@@ -17,73 +13,83 @@ class Explicit_FTP_TLS(ftplib.FTP_TLS):
             )
         return conn, size
 
+class FTPClient:
+    """Gestion complète des connexions et transferts FTPS."""
+    def __init__(self, host, user, password):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.ftp = None
 
-
-def connect_to_ftp(host, user, password):
-    """
-    Connecte au serveur FTP avec les informations fournies.
-    """
-    try:
-        ftp = Explicit_FTP_TLS(host)
-        ftp.auth()  # Initialiser l'authentification TLS
-        ftp.login(user=user, passwd=password)
-        ftp.prot_p()  # Activer la protection de la connexion de données
-        ftp.set_pasv(True)  # Activer le mode passif
-        print(f"Connexion réussie au serveur FTP : {host}")
-        return ftp
-    except Exception as e:
-        print(f"Erreur lors de la connexion au serveur FTP : {e}")
-        return None
-
-def transfer_file(ftp, local_file, remote_directory):
-    """
-    Transfère un fichier local vers un répertoire spécifique sur le serveur FTP.
-    Si le répertoire distant n'existe pas, il est créé.
-    """
-    try:
-        # Naviguer vers le répertoire distant ou le créer
+    def connect(self):
+        """Connexion au serveur FTP avec FTPS."""
         try:
-            ftp.cwd(remote_directory)
-        except Exception:
-            print(f"Répertoire distant non trouvé. Création de : {remote_directory}")
-            ftp.mkd(remote_directory)
-            ftp.cwd(remote_directory)
+            self.ftp = ExplicitFTPTLS(self.host)
+            self.ftp.auth()  # Initialiser l'authentification TLS
+            self.ftp.login(user=self.user, passwd=self.password)
+            self.ftp.prot_p()  # Activer la protection des connexions de données
+            self.ftp.set_pasv(True)  # Activer le mode passif
+            print(f"Connexion réussie au serveur FTP : {self.host}")
+        except Exception as e:
+            print(f"Erreur lors de la connexion au serveur FTP : {e}")
+            self.ftp = None
 
-        # Transférer le fichier
-        with open(local_file, "rb") as file:
-            ftp.storbinary(f"STOR {os.path.basename(local_file)}", file)
-        print(f"Transfert réussi : {local_file} vers {remote_directory}")
+    def transfer_file(self, local_file, remote_directory):
+        """Transfère un fichier local vers un répertoire distant."""
+        if not self.ftp:
+            print("Pas de connexion FTP active.")
+            return
 
-    except Exception as e:
-        print(f"Erreur lors du transfert de {local_file} : {e}")
+        try:
+            # Naviguer vers le répertoire distant ou le créer
+            try:
+                self.ftp.cwd(remote_directory)
+            except ftplib.error_perm:
+                print(f"Répertoire distant non trouvé. Création de : {remote_directory}")
+                self.ftp.mkd(remote_directory)
+                self.ftp.cwd(remote_directory)
 
-def transfer_files_to_ftp(host, user, password, files_and_directories):
-    """
-    Transfère plusieurs fichiers vers leurs répertoires appropriés sur le serveur FTP.
-    """
-    ftp = connect_to_ftp(host, user, password)
-    if not ftp:
-        return
+            # Transférer le fichier
+            with open(local_file, "rb") as file:
+                self.ftp.storbinary(f"STOR {os.path.basename(local_file)}", file)
+                print(f"Transfert réussi : {local_file} vers {remote_directory}")
+        except Exception as e:
+            print(f"Erreur lors du transfert de {local_file} : {e}")
 
-    for local_file, remote_directory in files_and_directories.items():
-        if os.path.exists(local_file):
-            transfer_file(ftp, local_file, remote_directory)
-        else:
-            print(f"Fichier local non trouvé : {local_file}")
+    def transfer_files(self, files_and_directories):
+        """Transfère plusieurs fichiers vers leurs répertoires appropriés."""
+        if not self.ftp:
+            print("Pas de connexion FTP active.")
+            return
 
-    ftp.quit()
-    print("Déconnexion du serveur FTP.")
+        for local_file, remote_directory in files_and_directories.items():
+            if os.path.exists(local_file):
+                self.transfer_file(local_file, remote_directory)
+            else:
+                print(f"Fichier local non trouvé : {local_file}")
+
+    def disconnect(self):
+        """Déconnecte du serveur FTP."""
+        if self.ftp:
+            try:
+                self.ftp.quit()
+                print("Déconnexion du serveur FTP.")
+            except Exception as e:
+                print(f"Erreur lors de la déconnexion : {e}")
 
 if __name__ == "__main__":
-    # Étape 1 : Prendre les informations de connexion
-    ftp_host = FTP_HOST
-    ftp_user = FTP_USER
-    ftp_password = FTP_PASSWORD
+    # Informations de connexion
+    FTP_HOST = "localhost"
+    FTP_USER = "ftpuser"
+    FTP_PASSWORD = "test123"
 
-    # Étape 2 : Fichiers à transférer et leurs répertoires distants
+    # Fichiers à transférer et leurs répertoires distants
     files_and_directories = {
-        "test.txt": "/test"     # Exemple de fichier à transférer
+        "test.txt": "/test"  # Exemple de fichier à transférer
     }
 
-    # Étape 3 : Transférer les fichiers
-    transfer_files_to_ftp(ftp_host, ftp_user, ftp_password, files_and_directories)
+    # Initialisation et transfert
+    ftp_client = FTPClient(FTP_HOST, FTP_USER, FTP_PASSWORD)
+    ftp_client.connect()
+    ftp_client.transfer_files(files_and_directories)
+    ftp_client.disconnect()

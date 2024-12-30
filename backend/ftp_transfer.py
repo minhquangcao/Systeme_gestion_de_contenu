@@ -77,19 +77,3 @@ class FTPClient:
             except Exception as e:
                 print(f"Erreur lors de la déconnexion : {e}")
 
-if __name__ == "__main__":
-    # Informations de connexion
-    FTP_HOST = "localhost"
-    FTP_USER = "ftpuser"
-    FTP_PASSWORD = "test123"
-
-    # Fichiers à transférer et leurs répertoires distants
-    files_and_directories = {
-        "test.txt": "/test"  # Exemple de fichier à transférer
-    }
-
-    # Initialisation et transfert
-    ftp_client = FTPClient(FTP_HOST, FTP_USER, FTP_PASSWORD)
-    ftp_client.connect()
-    ftp_client.transfer_files(files_and_directories)
-    ftp_client.disconnect()

@@ -1,6 +1,11 @@
 import streamlit as st
 from PIL import Image
 from backend.ftp_transfer import FTPClient
+import sys
+import os
+
+# Ajouter le chemin racine du projet
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Configuration de la page
 st.set_page_config(

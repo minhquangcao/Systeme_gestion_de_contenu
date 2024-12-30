@@ -1,11 +1,13 @@
 import streamlit as st
 from PIL import Image
 from backend.ftp_transfer import FTPClient
+from backend.analyseGenerateTemplate import WebScraper
 import sys
 import os
+import logging
 
 # Ajouter le chemin racine du projet
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Configuration de la page
 st.set_page_config(
@@ -92,16 +94,19 @@ elif menu == "Analyse de Site":
         else:
             with st.spinner("🔍 Analyse en cours..."):
                 # Résultats simulés
-                st.success("✅ Analyse terminée avec succès !")
-                st.json({
-                    "Structure détectée": {
-                        "Polices": ["Arial", "16px"],
-                        "Couleurs": ["Bleu", "Gris"],
-                        "Disposition": "Trois colonnes"
-                    },
-                    "Temps de chargement": "2.3 secondes",
-                    "Erreurs détectées": "Aucune"
-                })
+               
+                # Exemple d'utilisation de la classe WebScraper
+                scraper = WebScraper(url)
+                # Configurer le logger
+                logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+                # Ajouter des logs pour le processus d'analyse
+                logging.info(f"Début de l'analyse pour l'URL : {url}")
+                scraper.fetch_page()
+                logging.info("Page HTML récupérée avec succès.")
+                scraper.extract_and_save()
+                logging.info("Modèles d'articles extraits")
+                st.success("✅ Analyse terminée. Les modèles d'articles ont été extraits.")
 
 # **Création d'Articles**
 elif menu == "Création d'Articles":

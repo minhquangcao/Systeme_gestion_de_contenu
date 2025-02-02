@@ -1,81 +1,77 @@
 {
-    "mode": "default",
-    "sections": {
-        "Titre": {
-            "active": true,
+    "mode": "custom",
+    "sections": [
+        {
+            "name": "Intro",
+            "level": 1,
+            "content": "",
+            "formatting": {
+                "bold": true,
+                "italic": false,
+                "underline": false,
+                "strikethrough": false
+            },
             "style": {
-                "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
+                "font": "Times New Roman",
+                "font_size": 25,
+                "text_color": "#a21b1b",
+                "background_color": "#ffffff",
+                "alignment": "center"
             }
         },
-        "R\u00e9sum\u00e9/Abstract": {
-            "active": true,
+        {
+            "name": "contenu",
+            "level": 1,
+            "content": "",
+            "formatting": {
+                "bold": false,
+                "italic": false,
+                "underline": false,
+                "strikethrough": false
+            },
             "style": {
                 "font": "Arial",
-                "text_color": "#000000",
                 "font_size": 16,
-                "background_color": "#ffffff"
+                "text_color": "#000000",
+                "background_color": "#ffffff",
+                "alignment": "left"
             }
         },
-        "Introduction": {
-            "active": true,
+        {
+            "name": "sous contenu ",
+            "level": 2,
+            "content": "",
+            "formatting": {
+                "bold": false,
+                "italic": true,
+                "underline": false,
+                "strikethrough": false
+            },
             "style": {
                 "font": "Arial",
-                "text_color": "#000000",
                 "font_size": 16,
-                "background_color": "#ffffff"
+                "text_color": "#d2bcbc",
+                "background_color": "#795b12",
+                "alignment": "left"
             }
         },
-        "Mat\u00e9riels et M\u00e9thodes": {
-            "active": true,
+        {
+            "name": "conclusion ",
+            "level": 1,
+            "content": "",
+            "formatting": {
+                "bold": true,
+                "italic": false,
+                "underline": false,
+                "strikethrough": false
+            },
             "style": {
                 "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
+                "font_size": 25,
+                "text_color": "#101c81",
+                "background_color": "#ffffff",
+                "alignment": "right"
             }
-        },
-        "R\u00e9sultats": {
-            "active": true,
-            "style": {
-                "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
-            }
-        },
-        "Discussion": {
-            "active": true,
-            "style": {
-                "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
-            }
-        },
-        "Conclusion": {
-            "active": true,
-            "style": {
-                "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
-            }
-        },
-        "R\u00e9f\u00e9rences": {
-            "active": true,
-            "style": {
-                "font": "Arial",
-                "text_color": "#000000",
-                "font_size": 16,
-                "background_color": "#ffffff"
-            }
-        },
-        "Annexes": {
-            "active": false,
-            "style": {}
         }
-    }
+    ]
 }

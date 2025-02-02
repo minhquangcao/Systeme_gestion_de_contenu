@@ -336,28 +336,174 @@ elif menu == "Structure de l'Article":
 # **Création d'Articles**
 elif menu == "Création d'Articles":
     st.header("📝 Création d'Articles")
-    st.markdown("Complétez les champs ci-dessous pour générer un article.")
-    title = st.text_input("Titre de l'article :", placeholder="Entrez un titre captivant")
-    intro = st.text_area("Introduction :", placeholder="Rédigez une introduction percutante")
-    body = st.text_area("Contenu :", placeholder="Développez le contenu ici")
-    author = st.text_input("Nom de l'auteur :", placeholder="Nom de l'auteur")
-    image_file = st.file_uploader("Image principale (optionnel) :", type=["png", "jpg", "jpeg"])
+    st.markdown("Ici, vous pouvez créer et éditer votre article en remplissant tous les champs requis.")
 
+    # Choix du mode de création de l'article
+    creation_mode = st.radio("Sélectionnez le mode de création :", 
+                              ["Utiliser la structure par défaut", "Utiliser la structure d'analyse"])
 
-    if image_file:
-        st.image(Image.open(image_file), caption="Aperçu de l'image téléchargée", use_column_width=True)
+    # Dossier de sauvegarde des articles générés
+    output_folder = "generated_articles"
+    if not os.path.exists(output_folder):
+        st.write(f"Log : Création du dossier {output_folder}")
+        os.makedirs(output_folder)
 
-    if st.button("Générer l'Article"):
-        if not title or not body:
-            st.error("❌ Les champs obligatoires doivent être remplis.")
+    # ---------------------------
+    # Mode : Utiliser la structure par défaut
+    # ---------------------------
+    if creation_mode == "Utiliser la structure par défaut":
+        st.subheader("Création d'article via la structure d'article")
+        st.markdown("Chargez le fichier JSON contenant la structure d'article généré via la fonctionnalité 'Structure de l'Article'.\n\n\
+Le fichier peut être en mode **default** (sections sous forme de dictionnaire) ou **custom** (sections sous forme de liste).")
+
+        structure_file = st.file_uploader("Charger votre fichier de structure (article_structure.json)", type=["json"], key="structure_default")
+        if structure_file is not None:
+            try:
+                structure_data = json.load(structure_file)
+                mode = structure_data.get("mode")
+                if mode not in ["default", "custom"]:
+                    st.error("Le fichier chargé ne correspond pas à une structure d'article valide.")
+                else:
+                    st.markdown("### Remplissez le contenu pour chaque section")
+                    article_contents = {}
+                    # Mode DEFAULT : sections stockées dans un dictionnaire
+                    if mode == "default":
+                        sections = structure_data.get("sections", {})
+                        for section, conf in sections.items():
+                            if conf.get("active"):
+                                st.markdown(f"**Section : {section}**")
+                                content = st.text_area(f"Contenu pour la section '{section}'", key=f"content_default_{section}", height=150)
+                                article_contents[section] = {
+                                    "content": content,
+                                    "style": conf.get("style", {})
+                                }
+                    # Mode CUSTOM : sections stockées dans une liste
+                    else:
+                        sections = structure_data.get("sections", [])
+                        for idx, sec in enumerate(sections):
+                            st.markdown(f"**Section : {sec.get('name', f'Section {idx+1}') }**")
+                            content = st.text_area(f"Contenu pour la section '{sec.get('name', f'Section {idx+1}')}'", key=f"content_custom_{idx}", height=150)
+                            # On conserve la configuration existante (style, formatting, etc.)
+                            article_contents[idx] = {
+                                "name": sec.get("name", f"Section {idx+1}"),
+                                "content": content,
+                                "style": sec.get("style", {}),
+                                "formatting": sec.get("formatting", {})
+                            }
+                    # Bouton de génération de l'article
+                    if st.button("Générer l'article (structure d'article)"):
+                        # Vérifier que tous les champs sont remplis
+                        if mode == "default":
+                            missing = [sec for sec, data in article_contents.items() if data["content"].strip() == ""]
+                        else:
+                            missing = [data["name"] for data in article_contents.values() if data["content"].strip() == ""]
+                        if missing:
+                            st.error(f"Les champs suivants sont manquants : {', '.join(missing)}")
+                        else:
+                            final_article_html = ""
+                            # Traitement selon le mode
+                            if mode == "default":
+                                for section, data in article_contents.items():
+                                    style = data.get("style", {})
+                                    font = style.get("font", "Arial")
+                                    font_size = style.get("font_size", 16)
+                                    alignment = style.get("alignment", "left")
+                                    text_color = style.get("text_color", "#000000")
+                                    background_color = style.get("background_color", "#ffffff")
+                                    formatting = style.get("formatting", {})
+                                    style_str = (
+                                        f"font-family: {font}; "
+                                        f"font-size: {font_size}px; "
+                                        f"color: {text_color}; "
+                                        f"background-color: {background_color}; "
+                                        f"text-align: {alignment}; "
+                                        "padding: 10px; margin-bottom: 10px; border-radius: 5px;"
+                                    )
+                                    content = data["content"]
+                                    if formatting.get("bold"):
+                                        content = f"<b>{content}</b>"
+                                    if formatting.get("italic"):
+                                        content = f"<i>{content}</i>"
+                                    if formatting.get("underline"):
+                                        content = f"<u>{content}</u>"
+                                    if formatting.get("strikethrough"):
+                                        content = f"<s>{content}</s>"
+                                    section_html = f"<h2>{section}</h2>"
+                                    section_html += f"<div style='{style_str}'>{content}</div>"
+                                    final_article_html += section_html
+                            else:  # mode custom
+                                for idx, data in article_contents.items():
+                                    style = data.get("style", {})
+                                    formatting = data.get("formatting", {})
+                                    font = style.get("font", "Arial")
+                                    font_size = style.get("font_size", 16)
+                                    alignment = style.get("alignment", "left")
+                                    text_color = style.get("text_color", "#000000")
+                                    background_color = style.get("background_color", "#ffffff")
+                                    style_str = (
+                                        f"font-family: {font}; "
+                                        f"font-size: {font_size}px; "
+                                        f"color: {text_color}; "
+                                        f"background-color: {background_color}; "
+                                        f"text-align: {alignment}; "
+                                        "padding: 10px; margin-bottom: 10px; border-radius: 5px;"
+                                    )
+                                    content = data["content"]
+                                    if formatting.get("bold"):
+                                        content = f"<b>{content}</b>"
+                                    if formatting.get("italic"):
+                                        content = f"<i>{content}</i>"
+                                    if formatting.get("underline"):
+                                        content = f"<u>{content}</u>"
+                                    if formatting.get("strikethrough"):
+                                        content = f"<s>{content}</s>"
+                                    section_html = f"<h2>{data.get('name', f'Section {idx+1}')}</h2>"
+                                    section_html += f"<div style='{style_str}'>{content}</div>"
+                                    final_article_html += section_html
+
+                            st.markdown("### Prévisualisation de l'article final")
+                            st.markdown(final_article_html, unsafe_allow_html=True)
+                            # Vérification du contenu généré
+                            if not final_article_html.strip():
+                                st.error("Erreur : L'article généré est vide !")
+                            else:
+                                st.write("Log : Article généré avec succès.")
+                                # Bouton de téléchargement de l'article final
+                                download_filename = "final_article_default.html" if mode == "default" else "final_article_custom.html"
+                                try:
+                                    st.download_button(
+                                        label="Télécharger le fichier",
+                                        data=final_article_html.encode("utf-8"),
+                                        file_name=download_filename,
+                                        mime="text/html"
+                                    )
+                                    st.success("Téléchargement prêt !")
+                                except Exception as e:
+                                    st.error(f"Erreur lors du téléchargement : {e}")
+                                    st.write(f"Log : Exception - {e}")
+
+                                # Bouton d'enregistrement de l'article final côté serveur
+                                output_filename = "final_article_default.html" if mode == "default" else "final_article_custom.html"
+                                output_path = os.path.join(output_folder, output_filename)
+                                try:
+                                    with open(output_path, "w", encoding="utf-8") as f:
+                                        f.write(final_article_html)
+                                    st.success(f"Article final enregistré dans '{output_path}'.")
+                                except Exception as e:
+                                    st.error(f"Erreur lors de l'enregistrement : {e}")
+                                    st.write(f"Log : Exception - {e}")
+            except Exception as e:
+                st.error(f"Erreur lors du chargement du fichier JSON : {e}")
+                st.write(f"Log : Exception lors du chargement du JSON - {e}")
         else:
-            st.success("✅ Article généré avec succès !")
-            st.markdown(f"**Titre :** {title}")
-            st.markdown(f"**Introduction :** {intro}")
-            st.markdown(f"**Auteur :** {author}")
-            st.markdown(f"**Contenu :** {body}")
-    
-    
+            st.info("Veuillez charger votre fichier JSON de structure d'article.")
+
+    # ---------------------------
+    # Mode : Utiliser la structure d'analyse
+    # ---------------------------
+    else:
+        st.info("La fonctionnalité 'Utiliser la structure d'analyse' n'est pas encore implémentée.")
+
 # **Transfert FTP**
 elif menu == "Transfert FTP":
     st.header("📤 Transfert FTP")

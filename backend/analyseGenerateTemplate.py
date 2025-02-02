@@ -12,7 +12,7 @@ class WebScraper:
     IMPORTANT_TAGS = {
         "header", "main", "article", "section", "div", "h1", "h2", "h3", "p", "img", "ul", "ol", "li",
         "a", "span", "strong", "em", "blockquote", "code", "pre", "table", "tr", "th", "td", "form",
-        "input", "button", "select", "textarea", "label", "nav", "footer", "aside", "figure", "figcaption",
+        "input", "button", "select", "textarea", "label", "footer", "aside", "figure", "figcaption",
         "video", "audio", "iframe", "canvas", "svg", "path", "circle", "rect", "polygon", "polyline",
         "ellipse", "line", "g", "defs", "symbol", "use", "text", "tspan", "textPath", "clipPath", "mask",
         "pattern", "linearGradient", "radialGradient", "stop", "title", "desc", "metadata", "defs",

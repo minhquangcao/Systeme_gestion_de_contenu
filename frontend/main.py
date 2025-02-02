@@ -502,7 +502,70 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
     # Mode : Utiliser la structure d'analyse
     # ---------------------------
     else:
-        st.info("La fonctionnalité 'Utiliser la structure d'analyse' n'est pas encore implémentée.")
+        def load_json_structure(json_file):
+            """Charge et retourne la structure JSON définissant le format de l'article."""
+            try:
+                return json.load(json_file)
+            except Exception as e:
+                st.error(f"Erreur de chargement du fichier JSON : {e}")
+                return None
+
+        def generate_html_from_structure(structure, content_mapping):
+            """Génère du HTML à partir d'une structure JSON et des contenus fournis."""
+            def recursive_build(node):
+                tag = node.get("tag", "div")
+                styles = node.get("styles", {})
+                children = node.get("children", [])
+                
+                style_str = " ".join([f"{k}: {v};" for k, v in styles.items()])
+                
+                # Récupérer le contenu si le tag est dans le mapping
+                content = content_mapping.get(tag, "")
+                
+                inner_html = "".join([recursive_build(child) for child in children])
+                
+                return f'<{tag} style="{style_str}">{content}{inner_html}</{tag}>'
+            
+            return recursive_build(structure)
+
+        # Interface utilisateur Streamlit
+        st.title("📝 Générateur d'articles HTML")
+
+        uploaded_json = st.file_uploader("📂 Téléchargez un fichier JSON de structure", type=["json"])
+
+        if uploaded_json:
+            json_structure = load_json_structure(uploaded_json)
+            
+            if json_structure:
+                st.subheader("📝 Remplissez le contenu de l'article")
+                
+                # Champs utilisateur
+                title = st.text_input("Titre")
+                introduction = st.text_area("Introduction")
+                development = st.text_area("Développement")
+                conclusion = st.text_area("Conclusion")
+                author = st.text_input("Auteur")
+                date = st.date_input("Date de publication")
+                keywords = st.text_input("Mots-clés (séparés par des virgules)")
+                
+                if st.button("📄 Générer l'article HTML"):
+                    content_mapping = {
+                        "h1": title,
+                        "p": f"{introduction}\n{development}\n{conclusion}",
+                        "footer": f"Rédigé par {author} - {date}",
+                        "meta": f"keywords: {keywords}"
+                    }
+                    
+                    html_output = generate_html_from_structure(json_structure, content_mapping)
+                    
+                    # Sauvegarde du fichier
+                    output_path = "generated_articles/article_" + title +".html"
+                    os.makedirs("generated_articles", exist_ok=True)
+                    with open(output_path, "w", encoding="utf-8") as f:
+                        f.write(html_output)
+                        
+                    st.success("✅ Article généré avec succès !")
+                    st.download_button("⬇️ Télécharger l'article HTML", data=html_output, file_name="article.html", mime="text/html")
 
 # **Transfert FTP**
 elif menu == "Transfert FTP":

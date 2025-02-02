@@ -1,0 +1,81 @@
+{
+    "mode": "default",
+    "sections": {
+        "Titre": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "R\u00e9sum\u00e9/Abstract": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "Introduction": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "Mat\u00e9riels et M\u00e9thodes": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "R\u00e9sultats": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "Discussion": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "Conclusion": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "R\u00e9f\u00e9rences": {
+            "active": true,
+            "style": {
+                "font": "Arial",
+                "text_color": "#000000",
+                "font_size": 16,
+                "background_color": "#ffffff"
+            }
+        },
+        "Annexes": {
+            "active": false,
+            "style": {}
+        }
+    }
+}

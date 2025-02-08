@@ -6,9 +6,25 @@ import sys
 import os
 import logging
 import json
+import platform
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Ajouter le chemin racine du projet
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+current_os = platform.system()
+
+# Définir le répertoire backend
+backend_path = os.path.join(os.path.dirname(__file__))
+
+if current_os == 'Darwin':  # macOS
+    # Ajouter le répertoire backend au PYTHONPATH pour macOS
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + f':{backend_path}'
+elif current_os == 'Windows':  # Windows
+    # Ajouter le répertoire backend au PYTHONPATH pour Windows
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + f';{backend_path}'
+else:
+    print(f"Système non pris en charge: {current_os}")
 
 # Configuration de la page
 st.set_page_config(
@@ -67,8 +83,8 @@ st.markdown('<div class="main-title">🌐 Outil Pro de Gestion d\'Articles</div>
 # Menu de navigation dans la barre latérale
 st.sidebar.title("📂 Menu de Navigation")
 menu = st.sidebar.radio(
-    "Choisissez une section :", 
-    ["Accueil", "Analyse de Site", "Structure de l'Article", "Création d'Articles", "Transfert FTP", "Informations"]
+    "Choisissez une section :",
+    ["Accueil", "Analyse de Site", "Structure de l'Article", "Création d'Articles", "Informations"]
 )
 
 # **Accueil**
@@ -80,7 +96,7 @@ if menu == "Accueil":
         - Analyser des sites web pour en extraire des modèles d'articles.
         - Créer des articles avec des contenus personnalisés.
         - Transférer automatiquement vos fichiers sur un serveur via FTP.
-        
+
         Explorez les fonctionnalités à l'aide du menu de navigation. 🖱️
         """
     )
@@ -113,7 +129,7 @@ elif menu == "Structure de l'Article":
     st.markdown("Choisissez d'utiliser une structure par défaut ou créez votre propre organisation.")
 
     # Choix entre structure par défaut ou personnalisée
-    structure_mode = st.radio("Mode de définition de la structure :", 
+    structure_mode = st.radio("Mode de définition de la structure :",
                                ["Utiliser la structure par défaut", "Créer une structure personnalisée"])
 
     # -------------------------
@@ -146,11 +162,11 @@ elif menu == "Structure de l'Article":
                 st.markdown(f"##### Options pour la section **{section}**")
                 col1, col2 = st.columns(2)
                 with col1:
-                    font = st.selectbox(f"Police pour {section} :", 
+                    font = st.selectbox(f"Police pour {section} :",
                                         ["Arial", "Helvetica", "Times New Roman", "Courier New"],
                                         key=f"default_font_{section}")
                     font_size = st.slider(f"Taille du texte pour {section} :", 10, 50, 16, key=f"default_font_size_{section}")
-                    alignment = st.selectbox(f"Alignement pour {section} :", 
+                    alignment = st.selectbox(f"Alignement pour {section} :",
                                              ["left", "center", "right"],
                                              key=f"default_align_{section}")
                 with col2:
@@ -232,12 +248,12 @@ elif menu == "Structure de l'Article":
             with col1:
                 section_name = st.text_input("Nom de la section")
             with col2:
-                section_level = st.number_input("Niveau hiérarchique (1 = principal, 2 = sous-section, etc.)", 
+                section_level = st.number_input("Niveau hiérarchique (1 = principal, 2 = sous-section, etc.)",
                                                 min_value=1, max_value=5, value=1, step=1)
-            
+
             st.markdown("#### Contenu de la section")
             section_content = st.text_area("Saisissez le contenu (Markdown ou HTML est supporté)", height=150)
-            
+
             st.markdown("#### Options de formatage")
             col_format1, col_format2 = st.columns(2)
             with col_format1:
@@ -246,7 +262,7 @@ elif menu == "Structure de l'Article":
             with col_format2:
                 underline = st.checkbox("Souligné (Underline)")
                 strikethrough = st.checkbox("Barré (Strikethrough)")
-            
+
             st.markdown("#### Personnalisation du style")
             col_style1, col_style2, col_style3 = st.columns(3)
             with col_style1:
@@ -257,7 +273,7 @@ elif menu == "Structure de l'Article":
                 background_color = st.color_picker("Couleur de fond", "#ffffff")
             with col_style3:
                 alignment = st.selectbox("Alignement", ["left", "center", "right"])
-            
+
             submitted = st.form_submit_button("Ajouter la section")
             if submitted:
                 if section_name.strip() == "":
@@ -339,7 +355,7 @@ elif menu == "Création d'Articles":
     st.markdown("Ici, vous pouvez créer et éditer votre article en remplissant tous les champs requis.")
 
     # Choix du mode de création de l'article
-    creation_mode = st.radio("Sélectionnez le mode de création :", 
+    creation_mode = st.radio("Sélectionnez le mode de création :",
                               ["Utiliser la structure par défaut", "Utiliser la structure d'analyse"])
 
     # Dossier de sauvegarde des articles générés
@@ -516,16 +532,16 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
                 tag = node.get("tag", "div")
                 styles = node.get("styles", {})
                 children = node.get("children", [])
-                
+
                 style_str = " ".join([f"{k}: {v};" for k, v in styles.items()])
-                
+
                 # Récupérer le contenu si le tag est dans le mapping
                 content = content_mapping.get(tag, "")
-                
+
                 inner_html = "".join([recursive_build(child) for child in children])
-                
+
                 return f'<{tag} style="{style_str}">{content}{inner_html}</{tag}>'
-            
+
             return recursive_build(structure)
 
         # Interface utilisateur Streamlit
@@ -535,10 +551,10 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
 
         if uploaded_json:
             json_structure = load_json_structure(uploaded_json)
-            
+
             if json_structure:
                 st.subheader("📝 Remplissez le contenu de l'article")
-                
+
                 # Champs utilisateur
                 title = st.text_input("Titre")
                 introduction = st.text_area("Introduction")
@@ -547,7 +563,7 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
                 author = st.text_input("Auteur")
                 date = st.date_input("Date de publication")
                 keywords = st.text_input("Mots-clés (séparés par des virgules)")
-                
+
                 if st.button("📄 Générer l'article HTML"):
                     content_mapping = {
                         "h1": title,
@@ -555,40 +571,25 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
                         "footer": f"Rédigé par {author} - {date}",
                         "meta": f"keywords: {keywords}"
                     }
-                    
+
                     html_output = generate_html_from_structure(json_structure, content_mapping)
-                    
+
                     # Sauvegarde du fichier
                     output_path = "generated_articles/article_" + title +".html"
                     os.makedirs("generated_articles", exist_ok=True)
                     with open(output_path, "w", encoding="utf-8") as f:
                         f.write(html_output)
-                        
+
+                    # Transfert FTP
+                    ftp_client = FTPClient()
+                    ftp_client.connect()
+                    files = [output_path]
+                    ftp_client.transfer_files(files)
+                    ftp_client.disconnect()
+
                     st.success("✅ Article généré avec succès !")
                     st.download_button("⬇️ Télécharger l'article HTML", data=html_output, file_name="article.html", mime="text/html")
 
-# **Transfert FTP**
-elif menu == "Transfert FTP":
-    st.header("📤 Transfert FTP")
-    st.markdown("Entrez les informations nécessaires pour transférer vos fichiers.")
-    ftp_ip = st.text_input("Adresse du serveur FTP :", placeholder="ftp.exemple.com")
-    ftp_user = st.text_input("Nom d'utilisateur FTP :", placeholder="Utilisateur")
-    ftp_password = st.text_input("Mot de passe FTP :", type="password")
-
-    if st.button("Transférer les fichiers"):
-        if not ftp_ip or not ftp_user or not ftp_password:
-            st.error("❌ Veuillez remplir tous les champs.")
-        else:
-            with st.spinner("📤 Transfert en cours..."):
-                ftp_client = FTPClient(ftp_ip, ftp_user, ftp_password)
-                ftp_client.connect()
-                # Exemple de fichier à transférer, adapter selon vos besoins
-                files_and_directories = {
-                    "backend/test.txt": "test"
-                }
-                ftp_client.transfer_files(files_and_directories)
-                ftp_client.disconnect()
-                st.success(f"✅ Fichiers transférés avec succès sur le serveur : {ftp_ip}")
 
 # **Informations**
 elif menu == "Informations":

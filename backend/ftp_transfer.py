@@ -1,8 +1,11 @@
 import ftplib
 import os
+import time
+import streamlit as st
 
 class ExplicitFTPTLS(ftplib.FTP_TLS):
     """Explicit FTPS, with shared TLS session"""
+
     def ntransfercmd(self, cmd, rest=None):
         conn, size = ftplib.FTP.ntransfercmd(self, cmd, rest)
         if self._prot_p:
@@ -13,12 +16,15 @@ class ExplicitFTPTLS(ftplib.FTP_TLS):
             )
         return conn, size
 
+
 class FTPClient:
     """Gestion complète des connexions et transferts FTPS."""
-    def __init__(self, host, user, password):
-        self.host = host
-        self.user = user
-        self.password = password
+
+    def __init__(self):
+        self.host = os.getenv("SERVEUR_FTP")
+        self.user = os.getenv("USERNAME_FTP")
+        self.password = os.getenv("PASSWORD_FTP")
+        self.remote_directory = "htdocs/test"
         self.ftp = None
 
     def connect(self):
@@ -34,8 +40,12 @@ class FTPClient:
             print(f"Erreur lors de la connexion au serveur FTP : {e}")
             self.ftp = None
 
-    def transfer_file(self, local_file, remote_directory):
-        """Transfère un fichier local vers un répertoire distant."""
+    def progress_callback(self, block):
+        """Callback pour afficher la progression du transfert."""
+        self.pbar.update(len(block))  # Mettre à jour la barre de progression
+
+    def transfer_file(self, local_file):
+        """Transfère un fichier local vers un répertoire distant avec suivi de la progression."""
         if not self.ftp:
             print("Pas de connexion FTP active.")
             return
@@ -43,30 +53,42 @@ class FTPClient:
         try:
             # Naviguer vers le répertoire distant ou le créer
             try:
-                self.ftp.cwd(remote_directory)
+                self.ftp.cwd(self.remote_directory)
             except ftplib.error_perm:
-                print(f"Répertoire distant non trouvé. Création de : {remote_directory}")
-                self.ftp.mkd(remote_directory)
-                self.ftp.cwd(remote_directory)
+                print(f"Répertoire distant non trouvé. Création de : {self.remote_directory}")
+                self.ftp.mkd(self.remote_directory)
+                self.ftp.cwd(self.remote_directory)
 
-            # Transférer le fichier
-            with open(local_file, "rb") as file:
-                self.ftp.storbinary(f"STOR {os.path.basename(local_file)}", file)
-                print(f"Transfert réussi : {local_file} vers {remote_directory}")
+            # Obtenir la taille du fichier local pour la barre de progression
+            file_size = os.path.getsize(local_file)
+
+            with st.spinner(text="📤 Transfert en cours...",show_time=True):
+                time.sleep(5)
+                # Ouvrir le fichier local à transférer
+                with open(local_file, "rb") as file:
+                    self.ftp.storbinary(f"STOR {os.path.basename(local_file)}", file)
+
+                    # Vérification de la réussite du transfert en listant le fichier sur le serveur
+                    files = self.ftp.nlst()  # Récupérer la liste des fichiers sur le serveur
+                    if os.path.basename(local_file) in files:
+                        st.success(f"✅ Transfert réussi : {local_file}")
+                    else:
+                        st.error(f"❌ Le transfert a échoué : {local_file} n'est pas présent sur le serveur.")
+
         except Exception as e:
             print(f"Erreur lors du transfert de {local_file} : {e}")
 
-    def transfer_files(self, files_and_directories):
-        """Transfère plusieurs fichiers vers leurs répertoires appropriés."""
+    def transfer_files(self, files):
+        """Transfère plusieurs fichiers vers leurs répertoires appropriés avec suivi de la progression."""
         if not self.ftp:
             print("Pas de connexion FTP active.")
             return
 
-        for local_file, remote_directory in files_and_directories.items():
+        for local_file in files:
             if os.path.exists(local_file):
-                self.transfer_file(local_file, remote_directory)
+                self.transfer_file(local_file)
             else:
-                print(f"Fichier local non trouvé : {local_file}")
+                st.error(f"Fichier local non trouvé : {local_file}")
 
     def disconnect(self):
         """Déconnecte du serveur FTP."""
@@ -76,4 +98,3 @@ class FTPClient:
                 print("Déconnexion du serveur FTP.")
             except Exception as e:
                 print(f"Erreur lors de la déconnexion : {e}")
-

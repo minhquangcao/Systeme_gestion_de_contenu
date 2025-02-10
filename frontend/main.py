@@ -28,7 +28,7 @@ else:
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Outil Pro de Gestion d'Articles",
+    page_title="Outil GUI Analyse Génération et de Transfert automatique articles web",
     page_icon="📋",
     layout="wide"
 )
@@ -78,32 +78,19 @@ def apply_custom_styles():
 apply_custom_styles()
 
 # Titre principal
-st.markdown('<div class="main-title">🌐 Outil Pro de Gestion d\'Articles</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🌐 Outil Gestion d\'Articles</div>', unsafe_allow_html=True)
 
 # Menu de navigation dans la barre latérale
 st.sidebar.title("📂 Menu de Navigation")
 menu = st.sidebar.radio(
     "Choisissez une section :",
-    ["Accueil", "Analyse de Site", "Structure de l'Article", "Création d'Articles", "Informations"]
+    ["Analyser la structure d'un Site Web", "Créez votre structure de l'Article", "Remplissez votre Article", "Informations"]
 )
 
-# **Accueil**
-if menu == "Accueil":
-    st.header("🏠 Bienvenue sur l'Outil Pro de Gestion d'Articles")
-    st.markdown(
-        """
-        Cet outil vous permet de :
-        - Analyser des sites web pour en extraire des modèles d'articles.
-        - Créer des articles avec des contenus personnalisés.
-        - Transférer automatiquement vos fichiers sur un serveur via FTP.
-
-        Explorez les fonctionnalités à l'aide du menu de navigation. 🖱️
-        """
-    )
 
 # **Analyse de site web**
-elif menu == "Analyse de Site":
-    st.header("🌐 Analyse de Site Web")
+if menu == "Analyser la structure d'un Site Web":
+    st.header("🌐 Analyser la structure d'un Site Web")
     st.markdown("Analysez un site pour extraire ses modèles d'articles.")
     url = st.text_input("Entrez l'URL à analyser :", placeholder="https://exemple.com")
     if st.button("Analyser le Site"):
@@ -124,19 +111,19 @@ elif menu == "Analyse de Site":
 # =========================
 # **Structure de l'Article**
 # =========================
-elif menu == "Structure de l'Article":
-    st.header("🗂️ Définir la Structure de l'Article")
-    st.markdown("Choisissez d'utiliser une structure par défaut ou créez votre propre organisation.")
+elif menu == "Créez votre structure de l'Article":
+    st.header("🗂️ Définir la Structure de l'Article par Défault")
+    st.markdown("Choisissez d'utiliser une structure classique ou créez votre propre organisation.")
 
     # Choix entre structure par défaut ou personnalisée
     structure_mode = st.radio("Mode de définition de la structure :",
-                               ["Utiliser la structure par défaut", "Créer une structure personnalisée"])
+                               ["Utiliser la structure classique", "Créer une structure personnalisée"])
 
     # -------------------------
     # Mode par défaut
     # -------------------------
-    if structure_mode == "Utiliser la structure par défaut":
-        st.subheader("Structure par défaut")
+    if structure_mode == "Utiliser la structure classique":
+        st.subheader("Structure classique")
         st.markdown("Sélectionnez les sections classiques et personnalisez leur style et formatage. Une prévisualisation est affichée pour chaque section.")
 
         # Sections classiques avec options de sélection
@@ -144,11 +131,11 @@ elif menu == "Structure de l'Article":
             "Titre": True,
             "Résumé/Abstract": True,
             "Introduction": True,
-            "Matériels et Méthodes": True,
+            "Matériels et Méthodes": False,
             "Résultats": True,
-            "Discussion": True,
+            "Discussion": False,
             "Conclusion": True,
-            "Références": True,
+            "Références": False,
             "Annexes": False
         }
         selected_sections = {}
@@ -350,13 +337,13 @@ elif menu == "Structure de l'Article":
                     st.error(f"Erreur lors de l'enregistrement : {e}")
 
 # **Création d'Articles**
-elif menu == "Création d'Articles":
+elif menu == "Remplissez votre Article":
     st.header("📝 Création d'Articles")
     st.markdown("Ici, vous pouvez créer et éditer votre article en remplissant tous les champs requis.")
 
     # Choix du mode de création de l'article
     creation_mode = st.radio("Sélectionnez le mode de création :",
-                              ["Utiliser la structure par défaut", "Utiliser la structure d'analyse"])
+                              ["Utiliser une structure que vous avez créée", "Utiliser une structure extraite d'un site web"])
 
     # Dossier de sauvegarde des articles générés
     output_folder = "generated_articles"
@@ -367,15 +354,17 @@ elif menu == "Création d'Articles":
     # ---------------------------
     # Mode : Utiliser la structure par défaut
     # ---------------------------
-    if creation_mode == "Utiliser la structure par défaut":
-        st.subheader("Création d'article via la structure d'article")
-        st.markdown("Chargez le fichier JSON contenant la structure d'article généré via la fonctionnalité 'Structure de l'Article'.\n\n\
-Le fichier peut être en mode **default** (sections sous forme de dictionnaire) ou **custom** (sections sous forme de liste).")
-
-        structure_file = st.file_uploader("Charger votre fichier de structure (article_structure.json)", type=["json"], key="structure_default")
+    if creation_mode == "Utiliser une structure que vous avez créée":
+        st.subheader("Création d'article via la structure que vous avez créée")
+        try:
+            with open("article_structure.json", "r", encoding="utf-8") as file:
+                structure_file = json.load(file)
+            st.write("Fichier JSON chargé avec succès :", structure_file)
+        except Exception as e:
+            st.error(f"Erreur lors du chargement du fichier JSON : {e}")
         if structure_file is not None:
             try:
-                structure_data = json.load(structure_file)
+                structure_data = structure_file
                 mode = structure_data.get("mode")
                 if mode not in ["default", "custom"]:
                     st.error("Le fichier chargé ne correspond pas à une structure d'article valide.")
@@ -518,77 +507,8 @@ Le fichier peut être en mode **default** (sections sous forme de dictionnaire) 
     # Mode : Utiliser la structure d'analyse
     # ---------------------------
     else:
-        def load_json_structure(json_file):
-            """Charge et retourne la structure JSON définissant le format de l'article."""
-            try:
-                return json.load(json_file)
-            except Exception as e:
-                st.error(f"Erreur de chargement du fichier JSON : {e}")
-                return None
-
-        def generate_html_from_structure(structure, content_mapping):
-            """Génère du HTML à partir d'une structure JSON et des contenus fournis."""
-            def recursive_build(node):
-                tag = node.get("tag", "div")
-                styles = node.get("styles", {})
-                children = node.get("children", [])
-
-                style_str = " ".join([f"{k}: {v};" for k, v in styles.items()])
-
-                # Récupérer le contenu si le tag est dans le mapping
-                content = content_mapping.get(tag, "")
-
-                inner_html = "".join([recursive_build(child) for child in children])
-
-                return f'<{tag} style="{style_str}">{content}{inner_html}</{tag}>'
-
-            return recursive_build(structure)
-
-        # Interface utilisateur Streamlit
-        st.title("📝 Générateur d'articles HTML")
-
-        uploaded_json = st.file_uploader("📂 Téléchargez un fichier JSON de structure", type=["json"])
-
-        if uploaded_json:
-            json_structure = load_json_structure(uploaded_json)
-
-            if json_structure:
-                st.subheader("📝 Remplissez le contenu de l'article")
-
-                # Champs utilisateur
-                title = st.text_input("Titre")
-                introduction = st.text_area("Introduction")
-                development = st.text_area("Développement")
-                conclusion = st.text_area("Conclusion")
-                author = st.text_input("Auteur")
-                date = st.date_input("Date de publication")
-                keywords = st.text_input("Mots-clés (séparés par des virgules)")
-
-                if st.button("📄 Générer l'article HTML"):
-                    content_mapping = {
-                        "h1": title,
-                        "p": f"{introduction}\n{development}\n{conclusion}",
-                        "footer": f"Rédigé par {author} - {date}",
-                        "meta": f"keywords: {keywords}"
-                    }
-
-                    html_output = generate_html_from_structure(json_structure, content_mapping)
-
-                    # Sauvegarde du fichier
-                    output_path = "generated_articles/article_" + title +".html"
-                    os.makedirs("generated_articles", exist_ok=True)
-                    with open(output_path, "w", encoding="utf-8") as f:
-                        f.write(html_output)
-
-                    # Transfert FTP
-                    ftp_client = FTPClient()
-                    ftp_client.connect()
-                    files = [output_path]
-                    ftp_client.transfer_files(files)
-                    ftp_client.disconnect()
-
-                    st.success("✅ Article généré avec succès !")
-                    st.download_button("⬇️ Télécharger l'article HTML", data=html_output, file_name="article.html", mime="text/html")
+        st.subheader("Création d'article via une structure extraite d'un site web")
+        st.write("pas encore implémenté")
 
 
 # **Informations**

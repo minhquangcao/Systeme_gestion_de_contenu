@@ -1,7 +1,5 @@
 import streamlit as st
 from PIL import Image
-from backend.ftp_transfer import FTPClient
-from backend.analyseGenerateTemplate import WebScraper
 import sys
 import os
 import logging
@@ -11,20 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Ajouter le chemin racine du projet
-current_os = platform.system()
-
-# Définir le répertoire backend
-backend_path = os.path.join(os.path.dirname(__file__))
-
-if current_os == 'Darwin':  # macOS
-    # Ajouter le répertoire backend au PYTHONPATH pour macOS
-    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + f':{backend_path}'
-elif current_os == 'Windows':  # Windows
-    # Ajouter le répertoire backend au PYTHONPATH pour Windows
-    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + f';{backend_path}'
-else:
-    print(f"Système non pris en charge: {current_os}")
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+from backend.ftp_transfer import FTPClient
+from backend.analyseGenerateTemplate import WebScraper
 
 # Configuration de la page
 st.set_page_config(

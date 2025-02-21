@@ -6,7 +6,7 @@ import logging
 import json
 import platform
 from dotenv import load_dotenv
-
+import base64
 load_dotenv()
 
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
@@ -129,20 +129,18 @@ elif menu == "Créez votre structure de l'Article":
         for section, default in default_sections.items():
             selected_sections[section] = st.checkbox(f"Afficher la section **{section}**", value=default)
 
-        # Pour chaque section sélectionnée, possibilité d'ajouter des options de style et de formatage
+        # Pour chaque section sélectionnée, possibilité d'ajouter des options de style, de formatage et d'indiquer l'inclusion d'un média
         default_section_configs = {}
         for section, selected in selected_sections.items():
             if selected:
                 st.markdown(f"##### Options pour la section **{section}**")
                 col1, col2 = st.columns(2)
                 with col1:
-                    font = st.selectbox(f"Police pour {section} :",
-                                        ["Arial", "Helvetica", "Times New Roman", "Courier New"],
+                    font = st.selectbox(f"Police pour {section} :", ["Arial", "Helvetica", "Times New Roman", "Courier New"],
                                         key=f"default_font_{section}")
                     font_size = st.slider(f"Taille du texte pour {section} :", 10, 50, 16, key=f"default_font_size_{section}")
-                    alignment = st.selectbox(f"Alignement pour {section} :",
-                                             ["left", "center", "right"],
-                                             key=f"default_align_{section}")
+                    alignment = st.selectbox(f"Alignement pour {section} :", ["left", "center", "right"],
+                                            key=f"default_align_{section}")
                 with col2:
                     text_color = st.color_picker(f"Couleur du texte pour {section} :", "#000000", key=f"default_text_color_{section}")
                     background_color = st.color_picker(f"Couleur de fond pour {section} :", "#ffffff", key=f"default_bg_color_{section}")
@@ -153,9 +151,14 @@ elif menu == "Créez votre structure de l'Article":
                     underline = col_format[2].checkbox("Souligné", value=False, key=f"default_underline_{section}")
                     strikethrough = col_format[3].checkbox("Barré", value=False, key=f"default_strike_{section}")
 
-                # On utilise un texte d'exemple pour la prévisualisation
+                # Option pour indiquer l'inclusion d'un média
+                include_media = st.checkbox("Inclure un média (image, vidéo ou PDF) ?", key=f"include_media_{section}")
+                media_type = None
+                if include_media:
+                    media_type = st.selectbox("Type de média :", ["Image", "Vidéo", "PDF"], key=f"media_type_{section}")
+
+                # Prévisualisation d'exemple
                 sample_text = f"Ceci est un exemple de contenu pour la section {section}."
-                # Application du formatage sur le texte d'exemple
                 if bold:
                     sample_text = f"<b>{sample_text}</b>"
                 if italic:
@@ -165,7 +168,7 @@ elif menu == "Créez votre structure de l'Article":
                 if strikethrough:
                     sample_text = f"<s>{sample_text}</s>"
 
-                # Stocker la configuration
+                # Enregistrement de la configuration (on enregistre le type de média s'il est sélectionné)
                 default_section_configs[section] = {
                     "active": True,
                     "style": {
@@ -180,9 +183,9 @@ elif menu == "Créez votre structure de l'Article":
                             "underline": underline,
                             "strikethrough": strikethrough
                         }
-                    }
+                    },
+                    "media": {"included": include_media, "type": media_type} if include_media else None
                 }
-                # Prévisualisation de la section
                 style_str = (
                     f"font-family: {font}; "
                     f"font-size: {font_size}px; "
@@ -191,7 +194,7 @@ elif menu == "Créez votre structure de l'Article":
                     f"text-align: {alignment}; "
                     "padding: 10px; margin-bottom: 10px; border-radius: 5px;"
                 )
-                st.markdown(f"<h{min(2, 6)} style='margin-bottom:5px'>{section}</h{min(2, 6)}>", unsafe_allow_html=True)
+                st.markdown(f"<h{min(2,6)} style='margin-bottom:5px'>{section}</h{min(2,6)}>", unsafe_allow_html=True)
                 st.markdown(f"<div style='{style_str}'>{sample_text}</div>", unsafe_allow_html=True)
 
         # Bouton d'enregistrement pour la structure par défaut
@@ -248,6 +251,12 @@ elif menu == "Créez votre structure de l'Article":
             with col_style3:
                 alignment = st.selectbox("Alignement", ["left", "center", "right"])
 
+            st.markdown("#### Indiquer l'inclusion d'un média (image, vidéo ou PDF)")
+            include_media = st.checkbox("Inclure un média ?", key="custom_include_media")
+            media_type = None
+            if include_media:
+                media_type = st.selectbox("Type de média :", ["Image", "Vidéo", "PDF"], key="custom_media_type")
+
             submitted = st.form_submit_button("Ajouter la section")
             if submitted:
                 if section_name.strip() == "":
@@ -269,7 +278,8 @@ elif menu == "Créez votre structure de l'Article":
                             "text_color": text_color,
                             "background_color": background_color,
                             "alignment": alignment
-                        }
+                        },
+                        "media": {"included": include_media, "type": media_type} if include_media else None
                     }
                     st.session_state.custom_sections.append(new_section)
                     st.success(f"La section **{section_name}** a été ajoutée avec succès.")
@@ -308,6 +318,8 @@ elif menu == "Créez votre structure de l'Article":
                 header_tag = f"h{min(sec['level'], 6)}"
                 section_html = f"<{header_tag}>{sec['name']}</{header_tag}>"
                 section_html += f"<div style='{style_str}'>{content}</div>"
+                if sec.get("media"):
+                    section_html += f"<p><em>Média à inclure : {sec['media']['type']}</em></p>"
                 preview_html += section_html
             st.markdown(preview_html, unsafe_allow_html=True)
 
@@ -322,6 +334,7 @@ elif menu == "Créez votre structure de l'Article":
                     st.success("Structure personnalisée et styles enregistrés avec succès.")
                 except Exception as e:
                     st.error(f"Erreur lors de l'enregistrement : {e}")
+
 
 # **Création d'Articles**
 elif menu == "Remplissez votre Article":
@@ -339,7 +352,7 @@ elif menu == "Remplissez votre Article":
         os.makedirs(output_folder)
 
     # ---------------------------
-    # Mode : Utiliser la structure par défaut
+    # Mode : Utiliser une structure que vous avez créée
     # ---------------------------
     if creation_mode == "Utiliser une structure que vous avez créée":
         st.subheader("Création d'article via la structure que vous avez créée")
@@ -349,6 +362,8 @@ elif menu == "Remplissez votre Article":
             st.write("Fichier JSON chargé avec succès :", structure_file)
         except Exception as e:
             st.error(f"Erreur lors du chargement du fichier JSON : {e}")
+            structure_file = None
+
         if structure_file is not None:
             try:
                 structure_data = structure_file
@@ -358,33 +373,98 @@ elif menu == "Remplissez votre Article":
                 else:
                     st.markdown("### Remplissez le contenu pour chaque section")
                     article_contents = {}
+                    allowed_types = ["png", "jpg", "jpeg", "gif", "mp4", "mov", "pdf"]
                     # Mode DEFAULT : sections stockées dans un dictionnaire
                     if mode == "default":
                         sections = structure_data.get("sections", {})
                         for section, conf in sections.items():
                             if conf.get("active"):
+                                # Option pour afficher le titre dans le HTML final
+                                include_title = st.checkbox(f"Afficher le titre '{section}' dans le HTML ?", value=True, key=f"title_{section}")
                                 st.markdown(f"**Section : {section}**")
-                                content = st.text_area(f"Contenu pour la section '{section}'", key=f"content_default_{section}", height=150)
+                                content = st.text_area(f"Contenu pour la section '{section}'",
+                                                        key=f"content_default_{section}", height=150)
+                                # Affichage dans l'interface de la config du média
+                                if conf.get("media"):
+                                    st.markdown(f"Média attaché dans la structure : **{conf.get('media')}**")
+                                # Widget d'upload
+                                media_uploaded = st.file_uploader(
+                                    f"Uploader un média pour la section '{section}' (optionnel)",
+                                    type=allowed_types,
+                                    key=f"media_default_{section}"
+                                )
+                                # Vérification du type en fonction du JSON (si défini)
+                                expected_type = None
+                                if isinstance(conf.get("media"), dict):
+                                    expected_type = conf.get("media").get("type")
+                                if media_uploaded is not None:
+                                    ext = media_uploaded.name.split('.')[-1].lower()
+                                    if expected_type:
+                                        if expected_type.lower() == "image":
+                                            valid_extensions = ["png", "jpg", "jpeg", "gif"]
+                                        elif expected_type.lower() == "vidéo":
+                                            valid_extensions = ["mp4", "mov"]
+                                        elif expected_type.lower() == "pdf":
+                                            valid_extensions = ["pdf"]
+                                        else:
+                                            valid_extensions = allowed_types
+                                        if ext not in valid_extensions:
+                                            st.error(f"Le type de média uploadé ne correspond pas à la section '{section}' (attendu: {expected_type}, fourni: {ext}).")
+                                            media_uploaded = None
+                                # Si aucun fichier n'est uploadé, on garde le média défini dans la structure (s'il existe)
+                                media = media_uploaded if media_uploaded is not None else conf.get("media")
                                 article_contents[section] = {
                                     "content": content,
-                                    "style": conf.get("style", {})
+                                    "style": conf.get("style", {}),
+                                    "formatting": conf.get("style", {}).get("formatting", {}),
+                                    "media": media,
+                                    "include_title": include_title
                                 }
                     # Mode CUSTOM : sections stockées dans une liste
                     else:
                         sections = structure_data.get("sections", [])
                         for idx, sec in enumerate(sections):
-                            st.markdown(f"**Section : {sec.get('name', f'Section {idx+1}') }**")
-                            content = st.text_area(f"Contenu pour la section '{sec.get('name', f'Section {idx+1}')}'", key=f"content_custom_{idx}", height=150)
-                            # On conserve la configuration existante (style, formatting, etc.)
+                            section_title = sec.get("name", f"Section {idx+1}")
+                            include_title = st.checkbox(f"Afficher le titre '{section_title}' dans le HTML ?", value=True, key=f"title_custom_{idx}")
+                            st.markdown(f"**Section : {section_title}**")
+                            content = st.text_area(f"Contenu pour la section '{section_title}'",
+                                                   key=f"content_custom_{idx}", height=150)
+                            if sec.get("media"):
+                                st.markdown(f"Média attaché dans la structure : **{sec.get('media')}**")
+                            media_uploaded = st.file_uploader(
+                                f"Uploader un média pour la section '{section_title}' (optionnel)",
+                                type=allowed_types,
+                                key=f"media_custom_{idx}"
+                            )
+                            expected_type = None
+                            if isinstance(sec.get("media"), dict):
+                                expected_type = sec.get("media").get("type")
+                            if media_uploaded is not None:
+                                ext = media_uploaded.name.split('.')[-1].lower()
+                                if expected_type:
+                                    if expected_type.lower() == "image":
+                                        valid_extensions = ["png", "jpg", "jpeg", "gif"]
+                                    elif expected_type.lower() == "vidéo":
+                                        valid_extensions = ["mp4", "mov"]
+                                    elif expected_type.lower() == "pdf":
+                                        valid_extensions = ["pdf"]
+                                    else:
+                                        valid_extensions = allowed_types
+                                    if ext not in valid_extensions:
+                                        st.error(f"Le type de média uploadé ne correspond pas à la section '{section_title}' (attendu: {expected_type}, fourni: {ext}).")
+                                        media_uploaded = None
+                            media = media_uploaded if media_uploaded is not None else sec.get("media")
                             article_contents[idx] = {
-                                "name": sec.get("name", f"Section {idx+1}"),
+                                "name": section_title,
                                 "content": content,
                                 "style": sec.get("style", {}),
-                                "formatting": sec.get("formatting", {})
+                                "formatting": sec.get("formatting", {}),
+                                "media": media,
+                                "include_title": include_title
                             }
                     # Bouton de génération de l'article
                     if st.button("Générer l'article (structure d'article)"):
-                        # Vérifier que tous les champs sont remplis
+                        # Vérifier que tous les champs obligatoires sont remplis
                         if mode == "default":
                             missing = [sec for sec, data in article_contents.items() if data["content"].strip() == ""]
                         else:
@@ -393,16 +473,78 @@ elif menu == "Remplissez votre Article":
                             st.error(f"Les champs suivants sont manquants : {', '.join(missing)}")
                         else:
                             final_article_html = ""
-                            # Traitement selon le mode
+
+                            # Fonction pour sauvegarder le fichier uploadé dans un dossier spécifique et retourner le chemin
+                            def save_media_file(media_obj, allowed_types, destination_folder="./generated_articles/uploaded_media"):
+                                if not hasattr(media_obj, "read"):
+                                    return None
+                                media_obj.seek(0)
+                                ext = media_obj.name.split('.')[-1].lower() if hasattr(media_obj, "name") else ""
+                                if ext not in allowed_types:
+                                    st.error(f"Fichier non autorisé : .{ext} n'est pas accepté.")
+                                    return None
+                                if not os.path.exists(destination_folder):
+                                    os.makedirs(destination_folder)
+                                # On utilise le nom d'origine pour le fichier (vous pouvez ajouter un timestamp pour éviter les collisions)
+                    
+                                file_path = os.path.join(destination_folder, media_obj.name)
+                                try:
+                                    with open(file_path, "wb") as f:
+                                        media_obj.seek(0)
+                                        f.write(media_obj.read())
+                                    if os.path.exists(file_path):
+                                        st.write(f"Log : Fichier '{media_obj.name}' sauvegardé dans '{destination_folder}'.")
+                                        return file_path
+                                    else:
+                                        st.error("Erreur lors de la sauvegarde du fichier.")
+                                        return None
+                                except Exception as e:
+                                    st.error(f"Erreur lors de la sauvegarde du fichier : {e}")
+                                    return None
+
+                            # Fonction pour générer le HTML à partir du chemin du fichier
+                            def generate_media_html(media_obj):
+                                # Si c'est un fichier uploadé, on le sauvegarde et on récupère son chemin
+                                if hasattr(media_obj, "read"):
+                                    file_path = save_media_file(media_obj, allowed_types)
+                                    if not file_path:
+                                        return "<p>Erreur lors de la sauvegarde du fichier.</p>"
+                                    ext = file_path.split('.')[-1].lower()
+                                # Si c'est déjà un chemin (string)
+                                elif isinstance(media_obj, str):
+                                    file_path = media_obj
+                                    ext = file_path.split('.')[-1].lower()
+                                else:
+                                    return ""
+                                
+                                
+                                 # Nom de fichier seulement (ex : "MTV.pdf")
+                                filename = os.path.basename(file_path)
+
+                                # Depuis le dossier ./generated_articles, le chemin RELATIF vers uploaded_media est :
+                                # "./uploaded_media/<filename>"
+                                # (car physically : ./generated_articles/uploaded_media/<filename>)
+                                relative_path_for_html = f"./uploaded_media/{filename}"
+
+                                if ext in ["png", "jpg", "jpeg", "gif"]:
+                                    return f"<img src='{relative_path_for_html}' style='max-width:100%;'/>"
+                                elif ext == "pdf":
+                                    return f"<embed src='{relative_path_for_html}' width='100%' height='600px' type='application/pdf' />"
+                                else:
+                                    return "<p>Type de fichier non supporté.</p>"
+                                
+                                
+
+                            # Assemblage du HTML final selon le mode
                             if mode == "default":
                                 for section, data in article_contents.items():
                                     style = data.get("style", {})
+                                    formatting = data.get("formatting", {})
                                     font = style.get("font", "Arial")
                                     font_size = style.get("font_size", 16)
                                     alignment = style.get("alignment", "left")
                                     text_color = style.get("text_color", "#000000")
                                     background_color = style.get("background_color", "#ffffff")
-                                    formatting = style.get("formatting", {})
                                     style_str = (
                                         f"font-family: {font}; "
                                         f"font-size: {font_size}px; "
@@ -420,8 +562,13 @@ elif menu == "Remplissez votre Article":
                                         content = f"<u>{content}</u>"
                                     if formatting.get("strikethrough"):
                                         content = f"<s>{content}</s>"
-                                    section_html = f"<h2>{section}</h2>"
+                                    section_html = ""
+                                    if data.get("include_title", True):
+                                        section_html += f"<h2>{section}</h2>"
                                     section_html += f"<div style='{style_str}'>{content}</div>"
+                                    media = data.get("media")
+                                    if media:
+                                        section_html += generate_media_html(media)
                                     final_article_html += section_html
                             else:  # mode custom
                                 for idx, data in article_contents.items():
@@ -449,18 +596,21 @@ elif menu == "Remplissez votre Article":
                                         content = f"<u>{content}</u>"
                                     if formatting.get("strikethrough"):
                                         content = f"<s>{content}</s>"
-                                    section_html = f"<h2>{data.get('name', f'Section {idx+1}')}</h2>"
+                                    section_html = ""
+                                    if data.get("include_title", True):
+                                        section_html += f"<h2>{data.get('name', f'Section {idx+1}')}</h2>"
                                     section_html += f"<div style='{style_str}'>{content}</div>"
+                                    media = data.get("media")
+                                    if media:
+                                        section_html += generate_media_html(media)
                                     final_article_html += section_html
 
                             st.markdown("### Prévisualisation de l'article final")
                             st.markdown(final_article_html, unsafe_allow_html=True)
-                            # Vérification du contenu généré
                             if not final_article_html.strip():
                                 st.error("Erreur : L'article généré est vide !")
                             else:
                                 st.write("Log : Article généré avec succès.")
-                                # Bouton de téléchargement de l'article final
                                 download_filename = "final_article_default.html" if mode == "default" else "final_article_custom.html"
                                 try:
                                     st.download_button(
@@ -473,8 +623,6 @@ elif menu == "Remplissez votre Article":
                                 except Exception as e:
                                     st.error(f"Erreur lors du téléchargement : {e}")
                                     st.write(f"Log : Exception - {e}")
-
-                                # Bouton d'enregistrement de l'article final côté serveur
                                 output_filename = "final_article_default.html" if mode == "default" else "final_article_custom.html"
                                 output_path = os.path.join(output_folder, output_filename)
                                 try:
@@ -496,6 +644,7 @@ elif menu == "Remplissez votre Article":
     else:
         st.subheader("Création d'article via une structure extraite d'un site web")
         st.write("pas encore implémenté")
+
 
 
 # **Informations**

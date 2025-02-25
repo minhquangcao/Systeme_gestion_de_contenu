@@ -8,6 +8,7 @@ import platform
 from dotenv import load_dotenv
 import base64
 load_dotenv()
+FILE_CONFIG = "frontend/config/config.json"
 
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from backend.ftp_transfer import FTPClient
@@ -71,7 +72,7 @@ st.markdown('<div class="main-title">🌐 Outil Gestion d\'Articles</div>', unsa
 st.sidebar.title("📂 Menu de Navigation")
 menu = st.sidebar.radio(
     "Choisissez une section :",
-    ["Analyser la structure d'un Site Web", "Créez votre structure de l'Article", "Remplissez votre Article", "Informations"]
+    ["Analyser la structure d'un Site Web", "Créez votre structure de l'Article", "Remplissez votre Article", "Transfert FTP","Informations"]
 )
 
 
@@ -645,7 +646,35 @@ elif menu == "Remplissez votre Article":
         st.subheader("Création d'article via une structure extraite d'un site web")
         st.write("pas encore implémenté")
 
+# **Transfert FTP**
+if menu == "Transfert FTP":
+    st.header("📤 Transfert FTP")
+    st.markdown("Entrez les informations nécessaires pour transférer vos fichiers.")
 
+    ftp_ip = st.text_input("Adresse du serveur FTP :", placeholder="ftp.exemple.com")
+    ftp_user = st.text_input("Nom d'utilisateur FTP :", placeholder="Utilisateur")
+    ftp_password = st.text_input("Mot de passe FTP :", type="password")
+    ftp_directory = st.text_input("Répertoire FTP :", placeholder="")
+
+    if st.button("Se connecter"):
+        if not ftp_ip or not ftp_user or not ftp_password:
+            st.error("❌ Veuillez remplir tous les champs.")
+        else:
+            try:
+                with open(FILE_CONFIG, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+                data["USERNAME_FTP"] = ftp_user
+                data["PASSWORD_FTP"] = ftp_password
+                data["SERVEUR_FTP"] = ftp_ip
+                data["DIRECTORY_URL"] = f"htdocs/{ftp_directory}" if ftp_directory else "test"
+
+                with open(FILE_CONFIG, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4)
+
+                st.success("✅ Configuration enregistrée !")
+            except Exception as e:
+                st.error(f"❌ Une erreur est survenue : {e}")
 
 # **Informations**
 elif menu == "Informations":

@@ -2,7 +2,9 @@ import ftplib
 import os
 import time
 import streamlit as st
+import json
 
+FILE_CONFIG = "frontend/config/config.json"
 class ExplicitFTPTLS(ftplib.FTP_TLS):
     """Explicit FTPS, with shared TLS session"""
 
@@ -21,10 +23,13 @@ class FTPClient:
     """Gestion complète des connexions et transferts FTPS."""
 
     def __init__(self):
-        self.host = os.getenv("SERVEUR_FTP")
-        self.user = os.getenv("USERNAME_FTP")
-        self.password = os.getenv("PASSWORD_FTP")
-        self.remote_directory = "htdocs/test"
+        with open(FILE_CONFIG, "r", encoding="utf-8") as f:
+            data = json.load(f)  # Charger les données JSON
+
+        self.host = data["SERVEUR_FTP"]
+        self.user = data["USERNAME_FTP"]
+        self.password = data["PASSWORD_FTP"]
+        self.remote_directory = data["DIRECTORY_URL"]
         self.ftp = None
 
     def connect(self):
